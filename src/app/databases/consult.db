@@ -1,0 +1,76 @@
+CREATE DATABASE `db_ielfa`
+
+CREATE TABLE `Tbusuarios` (
+  `id_usr` integer PRIMARY KEY AUTO_INCREMENT,
+  `nombre_usr` varchar(100) NOT NULL,
+  `login_usr` varchar(100) NOT NULL,
+  `email_usr` varchar(50) NOT NULL,
+  `password_usr` varchar(200) NOT NULL,
+  `id_rol` integer NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `Tbroles` (
+  `id_rol` integer PRIMARY KEY AUTO_INCREMENT,
+  `nombre_rol` VARCHAR(50) DEFAULT 'Usuario'
+);
+
+ALTER TABLE `Tbusuarios`
+ADD CONSTRAINT `FK_UsuariosRoles`
+FOREIGN KEY (`id_rol`) REFERENCES Tbroles(`id_rol`);
+
+insert into tbroles (nombre_rol) values('Usuario');
+
+CREATE TABLE `Tbmiembros` (
+  `id_mie` integer PRIMARY KEY AUTO_INCREMENT,
+  `nombre_mie` varchar(100) NOT NULL,
+  `cedula_mie` integer(10) NOT NULL,
+  `direccion_mie` varchar(250) NOT NULL,
+  `telefono_mie` varchar(20) NOT NULL,
+  `fechanacimiento_mie` DATE NOT NULL,
+  `sexo_mie` varchar(10) NOT NULL,
+  `email_mie` varchar(50) NOT NULL,
+  `tipo_mie` varchar(10) NOT NULL,  
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `Tbeventos` (
+ `codigo_eve` varchar(10) PRIMARY KEY,
+  `nombre_eve` varchar(100) NOT NULL,
+  `fecha_eve` date NOT NULL,
+  `descripcion_eve` varchar(250) NOT NULL,
+  `status_eve` varchar(10) DEFAULT 'Activo',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE `Tbasistencia` (
+  `id_asi` INTEGER PRIMARY KEY AUTO_INCREMENT,
+  `id_mie` INTEGER NOT NULL,
+  `codigo_eve` varchar(10) NOT NULL,
+  `nombre_mie` VARCHAR(100) NOT NULL,
+  `cedula_mie` INTEGER(10) NOT NULL,
+  `fecha_eve` DATE NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE `Tbasistencia`
+ADD CONSTRAINT `FK_AsistenciaMiembros`
+FOREIGN KEY (`id_mie`) REFERENCES Tbmiembros(`id_mie`);
+
+ALTER TABLE `Tbasistencia`
+ADD CONSTRAINT `fk_evento`
+FOREIGN KEY (`codigo_eve`) REFERENCES `Tbeventos`(`codigo_eve`);
+
+CREATE TABLE `configuracion` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `totalMiembros` int NOT NULL,
+    `totalEventos` int NOT NULL
+);
+
+ALTER TABLE Tbasistencia
+ADD COLUMN `fecha_eve` date NOT NULL
+after cedula_mie
+
+Amazon AWS
+User: Administrator
+Clave: FjEc)LwSlz(kCoa)Hi$?GX@%Q5Bu!ZKO
