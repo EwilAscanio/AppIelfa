@@ -2,11 +2,13 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { LuArrowRight } from "react-icons/lu";
+import Loading from "@/libs/loading";
 
 const EliminarUsuario = ({ user_id }) => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   //Utilizo el hook useCallback para evitar que se ejecute la función en cada renderizado
   const handleDelete = useCallback(
@@ -29,12 +31,16 @@ const EliminarUsuario = ({ user_id }) => {
 
         // Verificar si el usuario confirmó la acción
         if (result.isConfirmed) {
+          setLoading(true); // Mostrar loading
+
           // Eliminar usuario mediante petición a la API
           const resp = await axios.delete(
             `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/usuarios/${user_id}`
           );
 
           if (resp.status === 200) {
+            setLoading(false); // Ocultar loading
+
             // Mostrar alerta de éxito
             await Swal.fire({
               title: "Eliminado!",
@@ -51,6 +57,8 @@ const EliminarUsuario = ({ user_id }) => {
           }
         }
       } catch (error) {
+        setLoading(false); // Ocultar loading en caso de error
+
         // Mostrar alerta de error
         await Swal.fire(
           "Error",
@@ -59,13 +67,20 @@ const EliminarUsuario = ({ user_id }) => {
         );
       }
     },
-    [user_id, router]
+    [user_id, router, setLoading]
   );
+
+
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <button
-      className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center mt-6"
+      className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-hover transition duration-300 flex items-center justify-center mt-6"
       onClick={handleDelete}
+      disabled={loading}
     >
       Eliminar Usuario
       <LuArrowRight className="ml-2" size={20} />

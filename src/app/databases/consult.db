@@ -49,7 +49,7 @@ CREATE TABLE `Tbasistencia` (
   `codigo_eve` varchar(10) NOT NULL,
   `nombre_mie` VARCHAR(100) NOT NULL,
   `cedula_mie` INTEGER(10) NOT NULL,
-  `fecha_eve` DATE NOT NULL,
+  `fecha_asi` DATE NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -74,3 +74,62 @@ after cedula_mie
 Amazon AWS
 User: Administrator
 Clave: FjEc)LwSlz(kCoa)Hi$?GX@%Q5Bu!ZKO
+
+SELECT
+    tbmiembros.id_mie,
+    tbmiembros.nombre_mie,
+    tbmiembros.cedula_mie,
+    tbmiembros.tipo_mie,
+    COUNT(tbasistencia.id_asi) AS total_eventos_asistidos,
+    GROUP_CONCAT(tbeventos.codigo_eve ORDER BY tbeventos.fecha_eve SEPARATOR ' | ') AS eventos_asistidos
+FROM
+    tbeventos
+JOIN
+    tbasistencia ON tbeventos.codigo_eve = tbasistencia.codigo_eve
+JOIN
+    tbmiembros ON tbasistencia.id_mie = tbmiembros.id_mie
+WHERE
+    tbeventos.fecha_eve >= '2025-06-01'
+    AND
+    tbeventos.fecha_eve <= '2025-06-22'
+GROUP BY
+    tbmiembros.id_mie,
+    tbmiembros.nombre_mie,
+    tbmiembros.cedula_mie,
+    tbmiembros.tipo_mie
+ORDER BY
+    total_eventos_asistidos DESC, nombre_mie;
+    
+    CREATE TABLE tbasistencia_borrador (
+    id_borrador INT AUTO_INCREMENT PRIMARY KEY,
+    codigo_eve VARCHAR(255) NOT NULL,
+    id_mie INT NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_evento_miembro (codigo_eve, id_mie)
+);
+
+En Postgress
+Agregar la columna image_usr
+
+-- Ejecuta esto una vez en tu base de datos
+ALTER TABLE tbasistencia_borrador 
+ADD CONSTRAINT unique_evento_miembro 
+UNIQUE (codigo_eve, id_mie);
+
+SELECT id_asi, id_mie, codigo_eve, fecha_asi,
+       ROW_NUMBER() OVER (PARTITION BY id_mie, codigo_eve ORDER BY id_asi) as rn
+FROM tbasistencia;
+
+DELETE FROM tbasistencia t1
+WHERE t1.id_asi IN (
+    SELECT t2.id_asi
+    FROM (
+        SELECT id_asi,
+               ROW_NUMBER() OVER (PARTITION BY id_mie, codigo_eve ORDER BY id_asi) as rn
+        FROM tbasistencia
+    ) t2
+    WHERE t2.rn > 1
+);
+
+ALTER TABLE tbasistencia
+ADD CONSTRAINT unique_miembro_evento UNIQUE (id_mie, codigo_eve);

@@ -8,13 +8,12 @@ const ChartComponent = () => {
   const [chartData, setChartData] = useState({ labels: [], data: [] }); // Nuevo estado para los datos del gráfico
   const [loading, setLoading] = useState(true); // Estado de carga para la API
 
-  // Mapeo de números de mes a nombres abreviados
-  const monthNames = [
-    "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
-  ];
-
   useEffect(() => {
+    const monthNames = [
+      "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+      "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+    ]; // Mover dentro del useEffect
+
     const fetchChartData = async () => {
       setLoading(true); // Inicia el estado de carga
       try {
@@ -53,7 +52,7 @@ const ChartComponent = () => {
     };
 
     fetchChartData();
-  }, []); // Se ejecuta solo una vez al montar el componente
+  }, []); // Eliminar monthNames de las dependencias
 
   useEffect(() => {
     // Solo renderizar/actualizar el gráfico si los datos han sido cargados

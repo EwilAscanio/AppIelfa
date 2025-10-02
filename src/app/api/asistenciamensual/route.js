@@ -1,31 +1,25 @@
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress"; 
 import { NextResponse } from "next/server";
 
 export const GET = async () => {
   try {
-    // Consulta SQL para obtener el conteo de asistencias por mes
-    // Extraemos el mes de la columna fecha_asi y contamos las ocurrencias.
-    // ORDER BY MONTH(fecha_asi) asegura que los meses estén en orden.
-    // Considera también filtrar por año si solo quieres el año actual o un año específico.
-    // Para el año actual, podrías añadir: WHERE YEAR(fecha_asi) = YEAR(CURDATE())
+    // Consulta para obtener el conteo de asistencias por mes (solo del año actual)
     const result = await conn.query(`
       SELECT
-        MONTH(fecha_asi) AS mes,
-        COUNT(*) AS total_asistencias
+        EXTRACT(MONTH FROM fecha_asi)::INTEGER AS mes,
+        COUNT(*)::INTEGER AS total_asistencias
       FROM
         tbasistencia
+      WHERE
+        EXTRACT(YEAR FROM fecha_asi) = EXTRACT(YEAR FROM CURRENT_DATE)
       GROUP BY
-        MONTH(fecha_asi)
+        EXTRACT(MONTH FROM fecha_asi)
       ORDER BY
         mes ASC;
     `);
 
-    console.log("Asistencias mensuales:", result); // Para depuración
-
-    // El resultado será algo como: [{ mes: 1, total_asistencias: 150 }, { mes: 2, total_asistencias: 200 }, ...]
-    // Esto es perfecto para el frontend.
-
-    return NextResponse.json(result);
+    // Devuelve solo las filas (formato limpio para el frontend)
+    return NextResponse.json(result.rows);
   } catch (error) {
     console.error("Error al obtener asistencia mensual:", error);
     return NextResponse.json(

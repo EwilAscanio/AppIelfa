@@ -1,56 +1,81 @@
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
+
+export const dynamic = 'force-dynamic';
 
 export const GET = async () => {
   try {
-    // Consulta para obtener todos los miembros
-    const allMembersResult = await conn.query(
-      `SELECT
+    if (!conn) {
+      throw new Error("No se pudo establecer conexión con la base de datos.");
+    }
+
+    // ✅ Edad en PostgreSQL: usa AGE() y EXTRACT()
+    const allMembersResult = await conn.query(`
+      SELECT
         *,
-        TIMESTAMPDIFF(YEAR, fechanacimiento_mie, CURDATE()) AS edad_actual
+        EXTRACT(YEAR FROM AGE(fechanacimiento_mie))::INTEGER AS edad_actual
       FROM
         tbmiembros
-        `);
+      ORDER BY
+        nombre_mie ASC
+    `);
 
-    // Consulta para contar miembros por género
-    // ASUMO que tienes una columna llamada 'genero_mie' o similar.
-    // Si tu columna se llama diferente (ej: 'sexo', 'genero'), cámbiala aquí.
-    const genderCountResult = await conn.query(
-     "SELECT sexo_mie, COUNT(*) AS count FROM tbmiembros GROUP BY sexo_mie");
+    const members = allMembersResult.rows; // 👈 .rows contiene los datos
 
+    if (!members || members.length === 0) {
+      throw new Error("No se encontraron miembros en la base de datos.");
+    }
 
-    // Formatear los resultados del conteo para que sean más fáciles de usar
-    const genderCounts = genderCountResult.reduce((acc, current) => {
+    // ✅ Conteo por género
+    const genderCountResult = await conn.query(`
+      SELECT 
+        sexo_mie, 
+        COUNT(*)::INTEGER AS count 
+      FROM tbmiembros
+      WHERE EXTRACT(YEAR FROM AGE(fechanacimiento_mie)) >= 10
+      GROUP BY sexo_mie
+    `);
+
+    // ✅ Conteo por tipo de miembro
+    const memberTypeCountResult = await conn.query(
+      "SELECT tipo_mie, COUNT(*)::INTEGER AS count FROM tbmiembros GROUP BY tipo_mie"
+    );
+
+    // ✅ Conteo de niños (edad < 10)
+    const childrenCountResult = await conn.query(`
+      SELECT COUNT(*)::INTEGER AS count
+      FROM tbmiembros
+      WHERE EXTRACT(YEAR FROM AGE(fechanacimiento_mie)) < 10
+    `);
+
+    // Formatear resultados
+    const genderCounts = genderCountResult.rows.reduce((acc, current) => {
       acc[current.sexo_mie] = current.count;
       return acc;
     }, {});
 
-    const tipoMembersResult = await conn.query(
-      "SELECT tipo_mie, COUNT(*) AS count FROM tbmiembros GROUP BY tipo_mie");
-    // Formatear los resultados del conteo por tipo de miembro
+    const memberTypeCounts = memberTypeCountResult.rows.reduce((acc, current) => {
+      acc[current.tipo_mie] = current.count;
+      return acc;
+    }, {});
 
-    // También puedes calcular el total aquí si lo necesitas
-    const totalMembers = allMembersResult.length;
+    const childrenCount = childrenCountResult.rows[0]?.count || 0;
 
-    // Retorna ambos resultados en un solo objeto JSON
     return NextResponse.json({
-      miembros: allMembersResult,
+      miembros: members,
       conteoPorGenero: genderCounts,
-      totalMiembros: totalMembers,
-      tipoMiembros: tipoMembersResult,
-      status: 200,
+      conteoPorTipoMiembro: memberTypeCounts,
+      conteoDeNinos: childrenCount,
+      totalMiembros: members.length,
     });
   } catch (error) {
-    console.error("Error al obtener miembros y conteo por género:", error); // Es buena práctica loggear el error
-    // Asegúrate de que 'result.error' no sea null si la variable 'result' no existe aquí
+    console.error("Error al obtener miembros y conteos:", error);
     return NextResponse.json(
       {
         message: "Error al realizar la consulta a la base de datos.",
-        error: error.message || "Error desconocido", // Usa error.message para depuración
+        error: error.message || "Error desconocido",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 };
@@ -60,58 +85,69 @@ export const POST = async (req) => {
   try {
     const data = await req.json();
 
-    if (!data.telefono_mie) {
-      data.telefono_mie = 0;
-    }
+    // Establecer valores por defecto
+    const telefono_mie = data.telefono_mie || "0"; // En PostgreSQL, teléfonos suelen ser texto
+    const email_mie = data.email_mie || "sincorreo@email.com";
 
-    if (!data.email_mie) {
-      data.email_mie = "sincorreo@email.com";
-    }
-      
-    // Validación de datos
-    if (!data.nombre_mie || !data.cedula_mie || !data.direccion_mie || 
-        !data.telefono_mie || !data.fechanacimiento_mie || !data.sexo_mie || !data.email_mie || !data.tipo_mie) {
+    // Validación de datos requeridos
+    if (
+      !data.nombre_mie ||
+      !data.cedula_mie ||
+      !data.direccion_mie ||
+      !data.fechanacimiento_mie ||
+      !data.sexo_mie ||
+      !data.tipo_mie
+    ) {
       return NextResponse.json({ message: "Faltan datos" }, { status: 400 });
     }
 
-    // Verificar miembro existente
+    // Verificar si el miembro ya existe
     const existingMember = await conn.query(
-      "SELECT * FROM tbmiembros WHERE cedula_mie = ?", [data.cedula_mie]
+      "SELECT 1 FROM tbmiembros WHERE cedula_mie = $1",
+      [data.cedula_mie]
     );
 
-    if (existingMember.length > 0) {
+    if (existingMember.rows.length > 0) {
       return NextResponse.json(
-        { message: "El miembro ya está registrado." }, { status: 400 }
+        { message: "El miembro ya está registrado." },
+        { status: 400 }
       );
     }
 
-    // 1. Insertar el nuevo miembro
-    const result = await conn.query("INSERT INTO tbmiembros SET ?", {
-      nombre_mie: data.nombre_mie,
-      cedula_mie: data.cedula_mie,
-      direccion_mie: data.direccion_mie,
-      telefono_mie: data.telefono_mie,
-      fechanacimiento_mie: data.fechanacimiento_mie,
-      sexo_mie: data.sexo_mie,
-      email_mie: data.email_mie,
-      tipo_mie: data.tipo_mie,
-    });
+    // Insertar nuevo miembro (sintaxis PostgreSQL)
+    const insertResult = await conn.query(
+      `INSERT INTO tbmiembros 
+       (nombre_mie, cedula_mie, direccion_mie, telefono_mie, fechanacimiento_mie, sexo_mie, email_mie, tipo_mie)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id_mie`,
+      [
+        data.nombre_mie,
+        data.cedula_mie,
+        data.direccion_mie,
+        telefono_mie,
+        data.fechanacimiento_mie,
+        data.sexo_mie,
+        email_mie,
+        data.tipo_mie,
+      ]
+    );
 
-    // 2. Actualizar el contador (sin transacción)
+    // Actualizar contador de miembros
     await conn.query(
-      "UPDATE configuracion SET totalMiembros = totalMiembros + 1 WHERE id = 1"
+      "UPDATE configuracion SET totalMiembros = totalMiembros + 1 WHERE id = $1",
+      [1]
     );
 
     return NextResponse.json({
       message: "Miembro registrado y contador actualizado exitosamente.",
-      result
+      id: insertResult.rows[0]?.id_mie,
     });
 
   } catch (error) {
+    console.error("Error al registrar miembro:", error);
     return NextResponse.json(
-      { message: error.message }, { status: 500 }
+      { message: "Error interno del servidor", error: error.message },
+      { status: 500 }
     );
   }
 };
-
-

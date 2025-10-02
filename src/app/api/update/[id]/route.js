@@ -1,70 +1,105 @@
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress";
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 
-export const GET = async (req, { params }) => {
+export const GET = async (request, { params }) => {
   try {
-    const result = await conn.query(`
-          SELECT * FROM tbusuarios WHERE id_usr = "${params.id}"`);
+    const { id } = params;
 
-    if (result.lenght === 0 || result == []) {
-      return NextResponse(
-        {
-          message: "Usuario no encontrado",
-        },
-        {
-          status: 404,
-        }
+    // Validar que el ID sea un número
+    if (!id || isNaN(Number(id))) {
+      return NextResponse.json(
+        { message: "ID de usuario inválido" },
+        { status: 400 }
       );
     }
-    return NextResponse.json(result[0]);
+
+    // ✅ Consulta segura con placeholder de PostgreSQL
+    const result = await conn.query(
+      "SELECT * FROM tbusuarios WHERE id_usr = $1",
+      [Number(id)] // Aseguro de pasar un número
+    );
+
+    // ✅ Acceder a .rows y verificar longitud correctamente
+    if (result.rows.length === 0) {
+      return NextResponse.json(
+        { message: "Usuario no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // ✅ Devolver el primer (y único) resultado
+    return NextResponse.json(result.rows[0]);
+
   } catch (error) {
-    return NextResponse(
-      {
-        message: error.message,
-      },
-      {
-        status: 500,
-      }
+    console.error("Error al obtener usuario:", error);
+    return NextResponse.json(
+      { message: "Error interno del servidor" },
+      { status: 500 }
     );
   }
 };
 
-export const PUT = async (req, { params }) => {
+export const PUT = async (request, { params }) => {
   try {
-    let { nombre_usr, login_usr, email_usr, password_usr, id_rol } =
-      await req.json();
+    const { id } = params;
 
-    password_usr = await bcrypt.hash(password_usr, 5);
-
-    const result = await conn.query(
-      `
-        UPDATE tbusuarios
-        SET nombre_usr = "${nombre_usr}", login_usr = "${login_usr}", email_usr = "${email_usr}", password_usr = "${password_usr}", id_rol = "${id_rol}"
-        WHERE id_usr = "${params.id}"
-      `
-    );
-
-    if (result.affectedRows === 0) {
-      return NextResponse(
-        {
-          message: "Usuario no encontrado",
-        },
-        {
-          status: 404,
-        }
+    // Validar que el ID sea un número
+    if (!id || isNaN(Number(id))) {
+      return NextResponse.json(
+        { message: "ID de usuario inválido" },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(result);
+    const {
+      nombre_usr,
+      login_usr,
+      email_usr,
+      password_usr,
+      id_rol
+    } = await request.json();
+
+    // Validar campos requeridos
+    if (!nombre_usr || !login_usr || !email_usr || !password_usr || !id_rol) {
+      return NextResponse.json(
+        { message: "Faltan datos requeridos" },
+        { status: 400 }
+      );
+    }
+
+    // Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(password_usr, 5); 
+
+    // ✅ Consulta segura con placeholders de PostgreSQL ($1, $2, ...)
+    const result = await conn.query(
+      `UPDATE tbusuarios
+       SET 
+         nombre_usr = $1,
+         login_usr = $2,
+         email_usr = $3,
+         password_usr = $4,
+         id_rol = $5
+       WHERE id_usr = $6
+       RETURNING *`,
+      [nombre_usr, login_usr, email_usr, hashedPassword, Number(id_rol), Number(id)]
+    );
+
+    // ✅ En PostgreSQL, usa .rowCount (no affectedRows)
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { message: "Usuario no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(result.rows[0]);
+
   } catch (error) {
+    console.error("Error al actualizar usuario:", error);
     return NextResponse.json(
-      {
-        message: error.message,
-      },
-      {
-        status: 500,
-      }
+      { message: "Error interno del servidor" },
+      { status: 500 }
     );
   }
 };

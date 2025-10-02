@@ -1,6 +1,8 @@
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+
+export const dynamic = 'force-dynamic';
 
 export const GET = async () => {
   /* Comentario: Realizacion de la consulta a la base de datos
@@ -11,7 +13,7 @@ export const GET = async () => {
   try {
     const result = await conn.query("SELECT * FROM tbusuarios");
 
-    return NextResponse.json(result);
+    return NextResponse.json(result.rows);
   } catch (error) {
     return NextResponse.json(
       {
@@ -25,8 +27,10 @@ export const GET = async () => {
 };
 
 export const POST = async (req) => {
+ 
   try {
     const data = await req.json();
+
     if (
       !data.nombre_usr ||
       !data.login_usr ||
@@ -43,15 +47,20 @@ export const POST = async (req) => {
       );
     }
 
+    // Destructuring de los datos recibidos
     let { nombre_usr, login_usr, email_usr, password_usr, id_rol } = data;
+    
 
-    // Verificar si el usuario ya está registrado
+    // 1. Verificar si el usuario ya existe
+    // Corrección: Usar $1 y $2 para los parámetros en PostgreSQL
+    
     const existingUser = await conn.query(
-      "SELECT * FROM tbusuarios WHERE email_usr = ? OR login_usr = ?",
+      "SELECT * FROM tbusuarios WHERE email_usr = $1 OR login_usr = $2",
       [email_usr, login_usr]
     );
 
-    if (existingUser.length > 0) {
+    // Corrección: El resultado de la consulta está en la propiedad 'rows'
+    if (existingUser.rows.length > 0) {
       return NextResponse.json(
         {
           message: "El usuario ya está registrado.",
@@ -62,17 +71,28 @@ export const POST = async (req) => {
       );
     }
 
+    // 2. Hashear la contraseña
     password_usr = await bcrypt.hash(password_usr, 5);
 
-    const result = await conn.query("INSERT INTO tbusuarios SET ?", {
+    // 3. Insertar el nuevo usuario
+    // Corrección: Usar la sintaxis de INSERT INTO ... VALUES (...)
+    const insertQuery = `
+      INSERT INTO tbusuarios 
+      (nombre_usr, login_usr, email_usr, password_usr, id_rol)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `;
+
+    const result = await conn.query(insertQuery, [
       nombre_usr,
       login_usr,
       email_usr,
       password_usr,
       id_rol,
-    });
+    ]);
 
-    return NextResponse.json(result);
+    // Corrección: El resultado de la inserción también está en 'rows'
+    return NextResponse.json(result.rows[0]);
   } catch (error) {
     return NextResponse.json(
       {

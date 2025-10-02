@@ -1,7 +1,7 @@
 // pages/api/auth/[...nextauth].js
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress";
 import bcrypt from "bcrypt";
 
 export const authOptions = {
@@ -9,7 +9,7 @@ export const authOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        login: { // Asegúrate de que el nombre del campo coincida con lo que envías desde el formulario
+        login: {
           label: "Login",
           type: "text",
           placeholder: "Login",
@@ -21,53 +21,48 @@ export const authOptions = {
         },
       },
       async authorize(credentials, req) {
-        // --- Paso 1: Validar que se enviaron credenciales ---
-        if (!credentials || !credentials.login || !credentials.password) {
-          console.error("Missing login or password credentials.");
-          throw new Error("Por favor, introduce tu usuario y contraseña.");
+        if (!credentials?.login || !credentials?.password) {
+          console.error("Credenciales faltantes");
+          return null; // 👈 NextAuth recomienda retornar null, no lanzar error
         }
 
-        let userFound;
         try {
-          // --- Paso 2: Buscar el usuario en la base de datos de forma segura ---
-          // Usar '?' para la sentencia preparada es CRUCIAL para evitar inyecciones SQL
-          userFound = await conn.query(
-            `SELECT * FROM tbusuarios WHERE login_usr = ?`,
-            [credentials.login.trim()] // El valor para '?'
+          const result = await conn.query(
+            "SELECT * FROM tbusuarios WHERE login_usr = $1",
+            [credentials.login.trim()]
           );
-        } catch (dbError) {
-          console.error("Error al consultar la base de datos:", dbError);
-          throw new Error("Error interno del servidor al verificar usuario.");
+
+          const user = result.rows[0]; // 👈 Aquí está la clave
+
+          if (!user) {
+            console.warn("Usuario no encontrado:", credentials.login);
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password_usr
+          );
+
+          if (!isPasswordValid) {
+            console.warn("Contraseña incorrecta para:", user.login_usr);
+            return null;
+          }
+
+          // ✅ Devuelve el usuario (NextAuth lo requiere con id y email)
+          return {
+            id: user.id_usr.toString(), // 👈 NextAuth espera id como string
+            name: user.nombre_usr,
+            login: user.login_usr,
+            email: user.email_usr,
+            role: user.id_rol, // 👈 Corregido: tu columna es id_rol, no rol_usr
+            image: user.imagen_usr
+          };
+
+        } catch (error) {
+          console.error("Error en authorize:", error);
+          return null;
         }
-
-        // --- Paso 3: Verificar si el usuario fue encontrado (CORRECCIÓN) ---
-        // userFound será un array, si está vacío, el usuario no existe
-        if (!userFound || userFound.length === 0) {
-          console.warn(`Intento de login fallido: Usuario '${credentials.login}' no encontrado.`);
-          throw new Error("Usuario no encontrado");
-        }
-
-        // --- Paso 4: Comparar la contraseña hasheada ---
-        const matchPassword = await bcrypt.compare(
-          credentials.password,
-          userFound[0].password_usr // Acceder al primer resultado del array
-        );
-
-        if (!matchPassword) {
-          console.warn(`Intento de login fallido: Contraseña inválida para el usuario '${userFound[0].login_usr}'.`);
-          throw new Error("Contraseña inválida");
-        }
-
-        // --- Paso 5: Devolver el objeto de usuario (si la autenticación es exitosa) ---
-        // NextAuth usará este objeto para crear la sesión
-        console.log(`Usuario '${userFound[0].login_usr}' autenticado exitosamente.`);
-        return {
-          id: userFound[0].id_usr, // Incluye el ID, es buena práctica para la sesión
-          name: userFound[0].nombre_usr,
-          login: userFound[0].login_usr,
-          email: userFound[0].email_usr,
-          role: userFound[0].rol_usr,
-        };
       },
     }),
   ],
@@ -75,14 +70,12 @@ export const authOptions = {
   pages: {
     signIn: "/login",
   },
-  // Opcional: Callbacks para añadir datos al token JWT y a la sesión
-  // Esto es bueno si quieres acceder a 'role' o 'id' desde session.user en el cliente o API routes
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.login = user.login; // Puedes añadir el login también si lo necesitas
+        token.login = user.login;
       }
       return token;
     },
@@ -98,5 +91,4 @@ export const authOptions = {
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

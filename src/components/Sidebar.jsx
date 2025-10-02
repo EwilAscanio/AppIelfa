@@ -4,6 +4,7 @@ import { FaUsersRectangle, FaPeopleGroup  } from "react-icons/fa6";
 import { BiSolidReport } from "react-icons/bi";
 import Link from "next/link";
 import LinkSignout from "@/components/LinkSignout";
+import Image from "next/image"; // Asegúrate de que estás importando Image correctamente
 
 const Sidebar = ({ isSidebarOpen }) => {
   const menuItems = [
@@ -38,6 +39,12 @@ const Sidebar = ({ isSidebarOpen }) => {
       active: false,
     },
     {
+      icon: <FaUsersRectangle className="w-5 h-5" />,
+      label: "Listado Asistencia",
+      path: "/auth/dashboard/listado-asistencia",
+      active: false,
+    },
+    {
       icon: <BiSolidReport  className="w-5 h-5" />,
       label: "Reporte",
       path: "/auth/dashboard/reportes",
@@ -54,10 +61,13 @@ const Sidebar = ({ isSidebarOpen }) => {
       {/* Contenedor del logo con altura fija */}
       <div className="flex items-center justify-center p-4 h-20">
         {isSidebarOpen && (
-          <img
+          <Image
             src="/images/LogoIelfa.png"
             alt="Logo"
             className="w-16 h-16 rounded-full"
+            property=""
+            width={64}
+            height={64}
           />
         )}
       </div>

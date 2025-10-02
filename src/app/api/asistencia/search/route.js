@@ -4,69 +4,54 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    // === CORRECCIÓN 1: Obtener el término del parámetro 'query' ===
     const searchTerm = searchParams.get('query');
 
-    console.log("searchTerm (API):", searchTerm); // Log para depuración
+    console.log("searchTerm (API):", searchTerm);
 
     if (!searchTerm || searchTerm.trim() === "") {
-      // Devolver un array vacío si no hay término de búsqueda
       return NextResponse.json([]);
     }
 
-    const safeSearchTerm = searchTerm.trim().substring(0, 50); // Limita la longitud
-    const searchParam = `%${safeSearchTerm.toLowerCase()}%`; // Parámetro para LIKE (busca en cualquier parte)
+    const safeSearchTerm = searchTerm.trim().substring(0, 50);
+    console.log("safeSearchTerm (API):", safeSearchTerm);
+    const searchPattern = `%${safeSearchTerm.toLowerCase()}%`;
+    console.log("searchPattern (API):", searchPattern);
 
-    // === CORRECCIÓN 2 y 3: Modificar la consulta SQL ===
-    // - Seleccionar id_mie, cedula_mie y nobre_mie
-    // - Buscar en cedula_mie O nobre_mie
-    // - Usar LIKE con comodines % y LOWER() para búsqueda general e insensible a mayúsculas
+
+    // ✅ Corregido: 
+    // - Usa $1, $2 (PostgreSQL)
+    // - Corrige "nobre_mie" → "nombre_mie"
     const query = `
-      SELECT id_mie, cedula_mie, nobre_mie
+      SELECT id_mie, cedula_mie, nombre_mie
       FROM tbmiembros
-      WHERE LOWER(cedula_mie) LIKE ? OR LOWER(nobre_mie) LIKE ?
+      WHERE LOWER(cedula_mie) LIKE $1 OR LOWER(nombre_mie) LIKE $2
       LIMIT 10
     `;
 
-    // === Ejecutar la consulta ===
-    // Pasar el parámetro dos veces, una para cada placeholder (?)
-    const queryResult = await conn.query(query, [searchParam, searchParam]);
+    
+    const result = await conn.query(query, [searchPattern, searchPattern]);
 
-    // === Extraer las filas del resultado ===
-    // Asumiendo que conn.query de 'mysql2/promise' devuelve [rows, fields]
-    let rows;
-    if (Array.isArray(queryResult) && Array.isArray(queryResult[0])) {
-        rows = queryResult[0];
-    }
-    // Si tu librería de DB devuelve solo el array de filas directamente, usa esto:
-    else if (Array.isArray(queryResult)) {
-        rows = queryResult;
-    }
-    // Si devuelve un objeto con una propiedad 'results' (menos común, pero posible)
-    else if (typeof queryResult === 'object' && queryResult !== null && Array.isArray(queryResult.results)) {
-        rows = queryResult.results;
-    }
-    else {
-        console.error("La Base de datos no retorna un array en un formato esperado:", queryResult);
-        return NextResponse.json({ message: "Formato de datos inesperado de la base de datos." }, { status: 500 });
-    }
+    console.log("Resultado de la consulta (API):", result);
+    // ✅ En PostgreSQL + node-postgres, los resultados están en .rows
+    const rows = result.rows;
 
-    // Verificar si las filas obtenidas son un array válido
     if (!Array.isArray(rows)) {
-       console.error("Algo salió mal después de obtener el resultado. 'rows' no es un array:", rows);
-       return NextResponse.json({ message: "Error procesando datos de la base de datos." }, { status: 500 });
+      console.error("Formato inesperado de resultado:", result);
+      return NextResponse.json(
+        { message: "Error al procesar los datos de la base de datos." },
+        { status: 500 }
+      );
     }
 
-    // Devolver los resultados como JSON
     return NextResponse.json(rows);
 
   } catch (error) {
-    console.error("Error en la consulta o búsqueda de miembros:", error);
-    // Devolver un error más descriptivo si es posible, o un mensaje genérico
-    return NextResponse.json({ message: "Ocurrió un error al buscar miembros.", error: error.message }, { status: 500 });
+    console.error("Error en la búsqueda de miembros:", error);
+    return NextResponse.json(
+      { message: "Ocurrió un error al buscar miembros.", error: error.message },
+      { status: 500 }
+    );
   }
-  // No necesitas un bloque finally si solo cierras la conexión, y si usas pool, no la cierras aquí.
-  // Si no usas pool y necesitas cerrar la conexión, asegúrate de que 'conn' sea manejado correctamente.
 }
 
 

@@ -15,59 +15,54 @@ const AdminDashboard = () => {
   const [totalEventos, setTotalEventos] = useState(null);
   const [totalHombres, setTotalHombres] = useState(0);
   const [totalMujeres, setTotalMujeres] = useState(0);
-  const [loading, setLoading] = useState(true); // Estado para manejar carga
+  const [totalNinos, setTotalNinos] = useState(0); 
+  const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
     const obtenerData = async () => {
       try {
-        // Ejecuta ambas peticiones en paralelo para mayor eficiencia
-        const [resConfiguracion, {data}] = await Promise.all([
+        const [resConfiguracion, resMiembros] = await Promise.all([
           axios.get(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/configuracion`),
           axios.get(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/miembro`)
         ]);
-
-        
-        // Manejo de la respuesta de configuracion
+  
+        // Manejo de configuración
         if (resConfiguracion.status === 200) {
-          // Si res.data es un objeto, accede directamente a sus propiedades
-          // Si res.data es un array que contiene el objeto, usa res.data[0]
-          const configData = Array.isArray(resConfiguracion.data) ? resConfiguracion.data[0] : resConfiguracion.data;
+          const configData = resConfiguracion.data; // Objeto plano, no array
 
-          setTotalMiembros(configData.totalMiembros || 0); // Asegura un valor por defecto
-          setTotalEventos(configData.totalEventos || 0); // Asegura un valor por defecto
-        } else {
-          console.warn("Error o respuesta inesperada de /api/configuracion:", resConfiguracion);
+          setTotalMiembros(configData.totalmiembros || 0);
+          setTotalEventos(configData.totalEventos || 0);
         }
+  
+        // Manejo de miembros
+        if (resMiembros.status === 200) {
+          const miembrosData = resMiembros.data;
 
-        // Manejo de la respuesta de miembros
-        if (data.status === 200) {
-        
-          // Actualiza los estados de hombres y mujeres
-          setTotalHombres(data.conteoPorGenero.masculino || 0); // Accede a conteoPorGenero.M, si no existe, 0
-          setTotalMujeres(data.conteoPorGenero.femenino || 0); // Accede a conteoPorGenero.F, si no existe, 0
-
-
-        } else {
-          console.warn("Error o respuesta inesperada de /api/miembro:", resMiembros);
+          // Ajusta estos nombres según lo que devuelve tu API
+          setTotalHombres(miembrosData.conteoPorGenero?.Masculino || 0);
+          setTotalMujeres(miembrosData.conteoPorGenero?.Femenino || 0);
+          setTotalNinos(miembrosData.conteoDeNinos || 0);
         }
-
+  
       } catch (error) {
         console.error("Error al obtener datos del dashboard:", error);
-        // Podrías mostrar un mensaje de error al usuario aquí
       } finally {
         setLoading(false);
       }
     };
-
+  
     obtenerData();
-  }, []); // El array de dependencias vacío significa que se ejecuta una vez al montar el componente
+  }, []);
 
   // Datos para las cards (ahora dinámicos y correctos)
   const cardData = [
     { title: "Total de Miembros", value: totalMiembros, change: "+12.5%" },
-    { title: "Eventos Realizados", value: totalEventos, change: "+5.2%" },
+    //{ title: "Eventos Realizados", value: totalEventos, change: "+5.2%" },
     { title: "Total de Hombres", value: totalHombres, change: "+8.7%" },
-    { title: "Total Mujeres", value: totalMujeres, change: "-2.1%" } 
+    { title: "Total de Mujeres", value: totalMujeres, change: "-2.1%" },
+    { title: "Total de Niños", value: totalNinos, change: "+2.1%" }  
   ];
 
   return (

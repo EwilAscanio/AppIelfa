@@ -7,15 +7,18 @@ import {
   // Image, // Si no usas Image con Logo, puedes quitarlo para aligerar
 } from "@react-pdf/renderer";
 
+// Define la cantidad de ítems que deseas por cada hoja
+const ITEMS_PER_PAGE = 23; // Puedes ajustar este número a tu preferencia
+
 // Estilos para el PDF
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
-    padding: 15, // Aumentar un poco el padding general
+    padding: 15,
     fontFamily: "Helvetica",
   },
   header: {
-    marginBottom: 20, // Más espacio debajo del encabezado
+    marginBottom: 5,
     textAlign: "center",
   },
   logo: {
@@ -24,59 +27,116 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   companyName: {
-    fontSize: 24, // Título de empresa un poco más grande
+    fontSize: 24,
     fontWeight: "bold",
   },
   address: {
-    fontSize: 11, // Tamaño de dirección ajustado
+    fontSize: 11,
     marginBottom: 5,
     textAlign: "center",
   },
   date: {
-    fontSize: 10, // Tamaño de fecha de generación ajustado
+    fontSize: 10,
     marginBottom: 10,
     textAlign: "center",
   },
   title: {
-    fontSize: 16, // Título del reporte más grande
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 1,
     textAlign: "center",
   },
   rangoFechas: {
     fontSize: 10,
     textAlign: 'center',
-    marginBottom: 15, // Más espacio debajo del rango de fechas
+    marginBottom: 15,
   },
   table: {
     display: "table",
-    width: "auto",
-    // Remove height: "auto" as it might cause issues with dynamic content
-    marginTop: 15, // Espacio superior de la tabla
-    border: "1px solid #000", // Borde de la tabla completo
+    width: "auto", // Mantén "auto" para que se ajuste al ancho disponible
+    marginTop: 15,
+    border: "1px solid #000",
   },
   tableRow: {
     flexDirection: "row",
-    borderBottom: "1px solid #eee", // Líneas de tabla más suaves
+    borderBottom: "1px solid #eee",
     backgroundColor: "#fff",
   },
   tableHeaderRow: {
-    backgroundColor: "#f2f2f2", // Color de fondo para el encabezado
-    borderBottom: "2px solid #000", // Borde inferior más grueso para el encabezado
+    backgroundColor: "#f2f2f2",
+    borderBottom: "2px solid #000",
   },
-  tableColHeader: {
-    width: "16.66%", // 100% / 6 columnas = 16.66%
+  // ESTILOS DE CABECERA DE COLUMNA AJUSTADOS
+
+  tableColHeaderCedula: {
+    width: "12%",
     padding: 8,
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 9, // Letra un poco más pequeña en encabezado
+    fontSize: 9,
   },
-  tableCol: {
-    width: "16.66%", // 100% / 6 columnas
+  tableColHeaderNombreMiembro: {
+    width: "18%",
     padding: 8,
     textAlign: "center",
-    fontSize: 8, // Letra un poco más pequeña en contenido
+    fontWeight: "bold",
+    fontSize: 9,
   },
+  tableColHeaderTipoMiembro: {
+    width: "15%",
+    padding: 8,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 9,
+  },
+  tableColHeaderCantidadEeventos: {
+    width: "15%", // ¡COLUMNA MÁS ANCHA!
+    padding: 8,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 9,
+  },
+  tableColHeaderNombreEventos: {
+    width: "30%",
+    padding: 8,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 9,
+  },
+
+  // ESTILOS DE CELDA DE CONTENIDO AJUSTADOS
+  tableColCedula: {
+    width: "15%",
+    padding: 8,
+    textAlign: "center",
+    fontSize: 8,
+  },
+  tableColNombreMiembro: {
+    width: "18%",
+    padding: 8,
+    textAlign: "center",
+    fontSize: 8,
+  },
+  tableColTipoMiembro: {
+    width: "15%",
+    padding: 8,
+    textAlign: "center",
+    fontSize: 8,
+  },
+  tableColCantidadEventos: {
+    width: "15%",
+    padding: 8,
+    textAlign: "center",
+    fontSize: 8,
+  },
+  tableColNombreEventos: {
+    width: "40%", // ¡COLUMNA MÁS ANCHA!
+    padding: 8,
+    textAlign: "center", // Puedes ajustar a "left" si prefieres que el nombre quede alineado a la izquierda
+    fontSize: 8,
+  },
+
+
   noData: {
     width: "100%",
     padding: 10,
@@ -85,24 +145,32 @@ const styles = StyleSheet.create({
     color: "#555",
   },
   total: {
-    fontSize: 12, // Tamaño del total ajustado
+    fontSize: 12,
     fontWeight: "bold",
-    marginTop: 15, // Espacio superior para el total
-    textAlign: "right", // Alinear a la derecha
-    paddingRight: 15, // Padding para que no se pegue al borde
+    marginTop: 15,
+    textAlign: "right",
+    paddingRight: 15,
   },
   footer: {
-    position: 'absolute', // Posiciona el footer absolutamente
-    bottom: 30, // Distancia desde el fondo
+    position: 'absolute',
+    bottom: 30,
     left: 0,
     right: 0,
     textAlign: "center",
     fontSize: 9,
     color: "#777",
   },
+  pageNumber: {
+    position: 'absolute',
+    fontSize: 9,
+    bottom: 30,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    color: "#777",
+  },
 });
 
-// Cambia la desestructuración de las props para recibir asistencias, totalAsistentes y rangoFechas
 const AsistenciaEvento = ({ asistencias, totalAsistentes, rangoFechas }) => {
   const nombreEmpresa = process.env.NEXT_PUBLIC_NOMBRE_EMPRESA;
   const direccionEmpresa = process.env.NEXT_PUBLIC_DIRECCION_EMPRESA;
@@ -120,79 +188,99 @@ const AsistenciaEvento = ({ asistencias, totalAsistentes, rangoFechas }) => {
     });
   };
 
-  const formatTime = (timeString) => {
-    if (!timeString) return "N/A";
-    return timeString.substring(0, 5); 
+  const getPaginatedAsistencias = (data, itemsPerPage) => {
+    const pages = [];
+    for (let i = 0; i < data.length; i += itemsPerPage) {
+      pages.push(data.slice(i, i + itemsPerPage));
+    }
+    if (pages.length === 0) {
+      pages.push([]);
+    }
+    return pages;
   };
+
+  const paginatedAsistencias = getPaginatedAsistencias(asistencias, ITEMS_PER_PAGE);
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          {/* <Image src={Logo} style={styles.logo} /> */}
-          <Text style={styles.companyName}>
-            {nombreEmpresa || "Nombre de la Empresa"}
-          </Text>
-          <Text style={styles.address}>
-            {direccionEmpresa || "Dirección de la Empresa"}
-          </Text>
-          <Text style={styles.date}>
-            Fecha de Generación: {new Date().toLocaleDateString('es-ES')}
-          </Text>
-        </View>
-
-        <View style={styles.title}>
-          <Text>Reporte de Asistencia a Eventos</Text>
-        </View>
-        {rangoFechas && (
-          <Text style={styles.rangoFechas}>
-            Período: {rangoFechas}
-          </Text>
-        )}
-
-        <View style={styles.table}>
-          <View style={[styles.tableRow, styles.tableHeaderRow]}> 
-            
-            <Text style={styles.tableColHeader}>Evento</Text>
-            <Text style={styles.tableColHeader}>Nombre Evento</Text>
-            <Text style={styles.tableColHeader}>Fecha Evento</Text>
-            <Text style={styles.tableColHeader}>Participante</Text>
-            <Text style={styles.tableColHeader}>Cédula</Text>
-            <Text style={styles.tableColHeader}>Tipo de Mimbro</Text>
-            
+      {paginatedAsistencias.map((pageAsistencias, pageIndex) => (
+        <Page size="A4" style={styles.page} key={`page-${pageIndex}`}>
+          <View style={styles.header}>
+            <Text style={styles.companyName}>
+              {nombreEmpresa || "Nombre de la Empresa"}
+            </Text>
+            <Text style={styles.address}>
+              {direccionEmpresa || "Dirección de la Empresa"}
+            </Text>
+            <Text style={styles.date}>
+              Fecha de Generación: {new Date().toLocaleDateString('es-ES')}
+            </Text>
           </View>
           
-          {asistencias && Array.isArray(asistencias) && asistencias.length > 0 ? (
-            asistencias.map((registroAsistencia, index) => (
-              <View key={registroAsistencia.id_asi || index} style={styles.tableRow}>
-                <Text style={styles.tableCol}>{registroAsistencia.codigo_eve}</Text>
-                <Text style={styles.tableCol}>{registroAsistencia.nombre_eve}</Text>
-                <Text style={styles.tableCol}>{formatDate(registroAsistencia.fecha_eve)}</Text>
-                <Text style={styles.tableCol}>{registroAsistencia.nombre_mie}</Text>
-                <Text style={styles.tableCol}>{registroAsistencia.cedula_mie}</Text>
-                <Text style={styles.tableCol}>{registroAsistencia.tipo_mie}</Text>
+          <View style={styles.title}>
+                    <Text>Reporte de Asistencia a Eventos</Text>
+                  </View>
+                  {rangoFechas && (
+                    <Text style={styles.rangoFechas}>
+                      Período: {rangoFechas}
+                    </Text>
+                  )}
+
+          <View style={styles.table}>
+            <View style={[styles.tableRow, styles.tableHeaderRow]}>
+              
+              <Text style={styles.tableColHeaderCedula}>Cedula</Text>
+                          <Text style={styles.tableColHeaderNombreMiembro}>Nombre Miembro</Text>
+                          <Text style={styles.tableColHeaderTipoMiembro}>Tipo Miembro</Text>
+                          <Text style={styles.tableColHeaderCantidadEeventos}>Cant Eventos</Text>
+                          <Text style={styles.tableColHeaderNombreEventos}>Nombres Eventos</Text>
+            </View>
+
+            {pageAsistencias && pageAsistencias.length > 0 ? (
+              pageAsistencias.map((registroAsistencia, index) => (
+                <View key={registroAsistencia.id_mie || `${pageIndex}-${index}`} style={styles.tableRow}>
                 
-              </View>
-            ))
-          ) : (
-            <View style={styles.tableRow}>
-              <Text style={styles.noData}>
-                No se encontraron registros de asistencia en el período seleccionado.
+                  <Text style={styles.tableColCedula}>{registroAsistencia.cedula_mie}</Text>
+                  <Text style={styles.tableColNombreMiembro}>{registroAsistencia.nombre_mie}</Text>
+                  
+                  <Text style={styles.tableColTipoMiembro}>{registroAsistencia.tipo_mie}</Text>
+                  <Text style={styles.tableColCantidadEventos}>{registroAsistencia.total_eventos_asistidos}</Text>
+                  <Text style={styles.tableColNombreEventos}>{registroAsistencia.eventos_asistidos}</Text>
+                </View>
+              ))
+            ) : (
+              pageIndex === 0 && asistencias.length === 0 && (
+                <View style={styles.tableRow}>
+                  <Text style={styles.noData}>
+                    No se encontraron registros de asistencia en el período seleccionado.
+                  </Text>
+                </View>
+              )
+            )}
+          </View>
+          {/*
+
+            {pageIndex === paginatedAsistencias.length - 1 && asistencias.length > 0 && (
+              <View>
+              <Text style={styles.total}>
+                Total de Asistentes: {totalAsistentes}
+              </Text>
+              <Text style={styles.total}>
+                Total de Niños en Asistencia: {conteoNinosEnAsistencia}
               </Text>
             </View>
           )}
-        </View>
+        */}
 
-        {asistencias.length > 0 && (
-          <Text style={styles.total}>
-            Total de Asistentes: {totalAsistentes}
-          </Text>
-        )}
-        
-        <Text style={styles.footer} fixed>
-          Este es un reporte generado automáticamente.
-        </Text>
-      </Page>
+          {/* <Text style={styles.footer} fixed>
+            Este es un reporte generado automáticamente.
+          </Text> */}
+
+          <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (
+            `${pageNumber} / ${totalPages}`
+          )} fixed />
+        </Page>
+      ))}
     </Document>
   );
 };

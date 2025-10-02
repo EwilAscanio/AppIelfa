@@ -21,7 +21,7 @@ const EliminarMiembro = ({ miembro_id }) => {
           text: "No podrás revertir esta acción",
           icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: "#9D00FF",
           cancelButtonColor: "#d33",
           confirmButtonText: "Sí, eliminar",
           cancelButtonText: "Cancelar",
@@ -40,7 +40,7 @@ const EliminarMiembro = ({ miembro_id }) => {
               title: "Eliminado!",
               text: "El usuario ha sido eliminado",
               icon: "success",
-              confirmButtonColor: "#3085d6",
+              confirmButtonColor: "#9D00FF",
             });
 
             // Redirigir al usuario después de la eliminación

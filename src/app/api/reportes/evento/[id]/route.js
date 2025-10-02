@@ -1,75 +1,45 @@
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 
-// Método para consultar los datos para el reporte Ventas de Combustible según su Uso de Vehículo
 export const GET = async (request) => {
-
-  console.log("URL", request);
   try {
-    // Obtener los parámetros de la URL
     const { searchParams } = new URL(request.url);
     const fechaInicial = searchParams.get("fechaInicial");
     const fechaFinal = searchParams.get("fechaFinal");
 
-    console.log("FECHA INICIAL", fechaInicial);
-    console.log("FECHA FINAL", fechaFinal);
-
-    // Validar que las fechas estén presentes
     if (!fechaInicial || !fechaFinal) {
-      console.log("FECHA INICIAL", fechaInicial);
-      console.log("FECHA FINAL", fechaFinal);
       return NextResponse.json(
-        {
-          message: "Todos los datos son requeridas.",
-        },
-        {
-          status: 400,
-        }
+        { message: "Las fechas inicial y final son requeridas." },
+        { status: 400 }
       );
     }
 
-    // Ajustar las fechas para incluir la hora
-    const fechaInicio = `${fechaInicial} 00:00:00`;
-    const fechaFin = `${fechaFinal} 23:59:59`;
+    // ✅ En PostgreSQL, puedes comparar fechas directamente si el campo es DATE
+    // Si `fecha_eve` es TIMESTAMP, puedes usar rangos con $1 y $2 como fechas ISO
+    // Ej: '2024-01-01' y '2024-01-31' → PostgreSQL las convierte automáticamente
 
-    console.log("FECHA INICio", fechaInicio);
-    console.log("FECHA FIN", fechaFin);
-
-    // Consulta SQL con filtro por fechas
     const result = await conn.query(
-      `
-        SELECT * FROM tbeventos where fecha_eve >= ? and fecha_eve <= ?;
-      `,
-      [fechaInicial, fechaFinal] // Pasar los parámetros
+      `SELECT * FROM tbeventos 
+       WHERE fecha_eve >= $1 AND fecha_eve <= $2`,
+      [fechaInicial, fechaFinal] // ✅ Usa las fechas en formato YYYY-MM-DD
     );
-    //[fechaInicio, fechaFin] // Pasar los parámetros
 
-    console.log("RESULT", result);
-    // Validar si no se encontraron registros
-    if (result.length === 0) {
+    const eventos = result.rows; // ✅ Accede a .rows
+
+    if (eventos.length === 0) {
       return NextResponse.json(
-        {
-          message:
-            "No se encontraron registros para las fechas proporcionadas.",
-        },
-        {
-          status: 404,
-        }
+        { message: "No se encontraron eventos para las fechas proporcionadas." },
+        { status: 200 } // 👈 200 es mejor que 404 si la consulta es válida pero sin resultados
       );
     }
 
+    return NextResponse.json({ eventos });
 
-    return NextResponse.json({
-      eventos: result});
   } catch (error) {
-    console.error("Error en la API:", error); // Log del error
+    console.error("Error en la API de eventos:", error);
     return NextResponse.json(
-      {
-        message: error.message,
-      },
-      {
-        status: 500,
-      }
+      { message: "Error interno del servidor", error: error.message },
+      { status: 500 }
     );
   }
 };

@@ -12,6 +12,7 @@ import {
   FaCalendarAlt,
   FaHandHoldingHeart,
 } from "react-icons/fa";
+import Image from "next/image";
 import JovenesReunion from "../../public/images/reunionjovenes.jpg"
 
 const LandingPage = () => {
@@ -176,11 +177,13 @@ const LandingPage = () => {
                 key={event.title}
                 className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-200"
               >
-                <img
+                <Image
                   src={event.image}
                   alt={event.title}
                   className="w-full h-48 object-cover"
                   loading="lazy"
+                  width={500}
+                  height={200}
                 />
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-2">{event.title}</h3>

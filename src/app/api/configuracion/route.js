@@ -1,10 +1,11 @@
-import { conn } from "@/libs/mariadb";
+import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 
 export const GET = async (req) => {
   try {
-    const result = await conn.query("SELECT * FROM configuracion WHERE id=1");
-    return NextResponse.json(result);
+    const result = await conn.query("SELECT * FROM configuracion WHERE id=$1", [1]);
+
+    return NextResponse.json(result.rows[0], { status: 200 });
   } catch (error) {
     console.error("Error al obtener la configuración:", error.message);
     return NextResponse.json(
@@ -18,48 +19,60 @@ export const GET = async (req) => {
   }
 };
 
+
 export const PUT = async (req) => {
   try {
     const data = await req.json();
     const { totalMiembros, totalEventos } = data;
 
-    let result;
+    // Actualizamos ambos campos en una sola consulta (mejor práctica)
+    const fields = [];
+    const values = [];
+    let paramIndex = 1;
 
-    // Solo actualizar si se proporciona el número de factura
-    if (totalMiembros) {
-      result = await conn.query(
-        `UPDATE configuracion
-         SET totalMiembros = ?
-         WHERE id = 1`,
-        [totalMiembros]
+    if (totalMiembros !== undefined) {
+      fields.push(`totalMiembros = $${paramIndex++}`);
+      values.push(totalMiembros);
+    }
+
+    if (totalEventos !== undefined) {
+      fields.push(`totalEventos = $${paramIndex++}`);
+      values.push(totalEventos);
+    }
+
+    // Si no hay campos para actualizar
+    if (fields.length === 0) {
+      return NextResponse.json(
+        { message: "No se proporcionaron datos para actualizar." },
+        { status: 400 }
       );
     }
 
-    // Solo actualizar si se proporciona la última vacunación
-    if (totalEventos) {
-      result = await conn.query(
-        `UPDATE configuracion
-         SET totalEventos = ?
-         WHERE id = 1`,
-        [totalEventos]
-      );
-    }
+    // Agregar el id al final de los valores
+    values.push(1); // WHERE id = 1
 
-    // Comprobar si se actualizó algo
-    if (result && result.affectedRows > 0) {
-      // Verifica que haya filas afectadas
+    const query = `
+      UPDATE configuracion
+      SET ${fields.join(", ")}
+      WHERE id = $${paramIndex}
+    `;
+
+    const result = await conn.query(query, values);
+
+    // En PostgreSQL, usamos rowCount (no affectedRows)
+    if (result.rowCount > 0) {
       return NextResponse.json(
         { message: "Los datos se actualizaron correctamente" },
         { status: 200 }
       );
     } else {
       return NextResponse.json(
-        { message: "No se realizaron actualizaciones." },
-        { status: 400 }
+        { message: "No se encontró el registro para actualizar." },
+        { status: 404 }
       );
     }
   } catch (error) {
-    console.error("Error al actualizar:", error.message);
+    console.error("Error al actualizar:", error);
     return NextResponse.json(
       { message: "Ocurrió un error al actualizar la configuración." },
       { status: 500 }
