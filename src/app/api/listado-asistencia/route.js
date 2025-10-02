@@ -27,7 +27,7 @@ ORDER BY
   } catch (error) {
     return NextResponse.json(
       {
-        message: result.error,
+        message: error.message,
       },
       {
         status: 500,

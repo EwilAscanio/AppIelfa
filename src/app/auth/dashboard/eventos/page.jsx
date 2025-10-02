@@ -1,43 +1,39 @@
 import axios from "axios";
 import Link from "next/link";
 
+/**
+ * Formatea una cadena de fecha (ej. de la BD) a un formato DD-MM-YYYY.
+ * @param {string} dateString - La fecha en formato de cadena.
+ * @returns {string} - La fecha formateada o un texto indicando invalidez/ausencia.
+ */
+const formatDate = (dateString) => {
+  if (!dateString) return "Fecha no disponible"; // Manejar fechas nulas o vacías
+  const date = new Date(dateString);
+  // Verificar si la fecha es válida
+  if (isNaN(date.getTime())) {
+      return "Fecha inválida";
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Meses son 0-indexados
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${day}-${month}-${year}`;
+};
+
 const loadEventos = async () => {
   try {
-     // 1. OBTENER LA URL DE CONFIGURACIÓN (del .env)
-      //    No renombramos la variable del proceso de entorno.
-      const configUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL || ''; 
-     
-     // 2. DETERMINAR LA BASE_URL EN BASE A SI INCLUYE 'localhost'
-     const BASE_URL = configUrl && configUrl.includes('localhost')
-     ? configUrl // Caso: Desarrollo (ej. http://localhost:3000 o 3001)
-     : '';  // Caso: Producción/Vercel (ej. tudominio.com), usar ruta relativa
-     
-      // 3. REALIZAR LA LLAMADA AXIOS
-     const { data } = await axios.get(`${BASE_URL}/api/evento`);
+    // En Componentes de Servidor, siempre usa la URL absoluta para las llamadas a la API.
+    // Esto funciona tanto en desarrollo como en producción.
+    const { data } = await axios.get(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/evento`);
     return data;
   } catch (error) {
     console.error("Error loading events:", error);
-    // Retornar un array vacío o manejar el error según sea necesario
     return [];
   }
 };
 
 const EventosPage = async () => {
   const eventos = await loadEventos();
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "Fecha no disponible"; // Manejar fechas nulas o vacías
-    const date = new Date(dateString);
-    // Verificar si la fecha es válida
-    if (isNaN(date.getTime())) {
-        return "Fecha inválida";
-    }
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Meses son 0-indexados
-    const day = String(date.getDate()).padStart(2, "0");
-
-    return `${day}-${month}-${year}`;
-  };
 
   const EventFormat = eventos.map((evento) => ({
     ...evento,
