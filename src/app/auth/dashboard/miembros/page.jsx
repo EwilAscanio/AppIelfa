@@ -3,9 +3,17 @@ import Link from "next/link";
 
 const loadMiembros = async () => {
   try {
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/miembro`
-    );
+     // 1. OBTENER LA URL DE CONFIGURACIÓN (del .env)
+      //    No renombramos la variable del proceso de entorno.
+      const configUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+     
+     // 2. DETERMINAR LA BASE_URL EN BASE A SI INCLUYE 'localhost'
+     const BASE_URL = configUrl && configUrl.includes('localhost')
+     ? configUrl // Caso: Desarrollo (ej. http://localhost:3000 o 3001)
+     : '';  // Caso: Producción/Vercel (ej. tudominio.com), usar ruta relativa
+     
+      // 3. REALIZAR LA LLAMADA AXIOS
+     const { data } = await axios.get(`${BASE_URL}/api/miembro`);
     return data.miembros;
   } catch (error) {
     console.error("Error loading miembros:", error);
