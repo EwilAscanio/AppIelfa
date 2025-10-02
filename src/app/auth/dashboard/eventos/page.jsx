@@ -5,7 +5,7 @@ const loadEventos = async () => {
   try {
      // 1. OBTENER LA URL DE CONFIGURACIÓN (del .env)
       //    No renombramos la variable del proceso de entorno.
-      const configUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+      const configUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL || ''; 
      
      // 2. DETERMINAR LA BASE_URL EN BASE A SI INCLUYE 'localhost'
      const BASE_URL = configUrl && configUrl.includes('localhost')
