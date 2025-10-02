@@ -41,7 +41,7 @@ const Sidebar = ({ isSidebarOpen }) => {
     {
       icon: <FaUsersRectangle className="w-5 h-5" />,
       label: "Listado Asistencia",
-      path: "/auth/dashboard/listado-asistencia",
+      path: "/auth/dashboard/listadoasistencia",
       active: false,
     },
     {
