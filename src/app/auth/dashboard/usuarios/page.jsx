@@ -6,7 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // Esta función sigue siendo la misma para cargar los usuarios
 const loadUsers = async () => {
   try {
-    const { data } = await axios.get(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/usuarios`);
+    const { data } = await axios.get(`/api/usuarios`);
     return data;
   } catch (error) {
     console.error("Error al cargar usuarios:", error);
