@@ -4,7 +4,7 @@ import Link from "next/link";
 const loadListadoAsistencia = async () => {
   try {
     const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/listado-asistencia`
+      `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/listadoasistencia`
     );
     return data;
   } catch (error) {
@@ -14,7 +14,7 @@ const loadListadoAsistencia = async () => {
   }
 };
 
-const EventosPage = async () => {
+const ListadoAsistenciaPage = async () => {
   const asistencia = await loadListadoAsistencia();
 
   const formatDate = (dateString) => {
@@ -128,4 +128,4 @@ const EventosPage = async () => {
   );
 };
 
-export default EventosPage;
+export default ListadoAsistenciaPage;
