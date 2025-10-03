@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react"; // 👈 Importa useSession
 import PropTypes from "prop-types";
 import LinkSignout from "./LinkSignout";
+import Image from "next/image"; 
 
 const NavbarDashboard = ({ toggleSidebar, messages, notifications }) => {
   // 👇 Obtén la sesión directamente (sin axios ni endpoints)
@@ -26,13 +27,16 @@ const NavbarDashboard = ({ toggleSidebar, messages, notifications }) => {
         </button>
 
         <div className="flex items-center">
-          <img
-            src={userImage}
-            alt="Profile"
-            className="w-10 h-10 rounded-full object-cover"
-            width={40}
-            height={40}
-          />
+        <Image
+  src={userImage}
+  alt="Profile"
+  // 2. Definimos ancho y alto
+  width={40} 
+  height={40}
+  // 3. Aplicamos clases de estilo. 
+  // 'object-cover' es clave para mantener la imagen dentro de sus límites.
+  className="rounded-full object-cover" 
+/>
           <div className="ml-3">
             <p className="font-semibold text-gray-800">{userName}</p>
             <p className="text-sm text-gray-500">{userRole === 1 ? "Administrador" : "Usuario"}</p>
