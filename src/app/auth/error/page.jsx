@@ -32,7 +32,7 @@ function AuthErrorContent() {
       </div>
 
       <div className="mt-6">
-        <Link href="/auth/login" passHref>
+        <Link href="/login" passHref>
           <button className="w-full flex items-center justify-center px-4 py-3 text-white font-semibold rounded-lg shadow-md transition-colors duration-300 bg-primary hover:bg-primary-hover">
             <FaSignInAlt className="mr-3" />
             Volver al Inicio de Sesión
