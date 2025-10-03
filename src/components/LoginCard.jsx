@@ -189,12 +189,12 @@ const LoginCard = () => {
             {/* Texto Central */}
             <div className="relative h-full flex items-center justify-center p-12">
               {/* ✨ CAMBIO 2: Texto en color blanco */}
-              <div className="text-center text-white"> 
-                <h3 className="text-4xl font-extrabold mb-4 leading-snug">
-                  Unidos en Fe
+              <div className="text-center text-white">
+                <h3 className="text-4xl font-extrabold mb-4 leading-snug text-purple-700 animate-pulse">
+                  IELFA
                 </h3>
-                <p className="text-xl opacity-90">
-                  Tu comunidad cristiana te espera
+                <p className="text-xl opacity-90 shadow-lg shadow-purple-500/50 ">
+                  App para la Gestión de Asistencias a Eventos
                 </p>
               </div>
             </div>
