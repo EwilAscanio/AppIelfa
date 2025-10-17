@@ -131,5 +131,28 @@ WHERE t1.id_asi IN (
     WHERE t2.rn > 1
 );
 
+
 ALTER TABLE tbasistencia
 ADD CONSTRAINT unique_miembro_evento UNIQUE (id_mie, codigo_eve);
+
+ALTER TABLE tbmiembros
+ADD CONSTRAINT unique_cedula UNIQUE (cedula_mie);
+
+CREATE TABLE tbfamilias (
+    id_fam SERIAL PRIMARY KEY,
+    id_jefe_fam INT NOT NULL REFERENCES tbmiembros(id_mie) UNIQUE, 
+    nombre_fam VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE tbmiembros
+ADD COLUMN id_familia INT,
+ADD COLUMN parentesco VARCHAR(50);
+
+ALTER TABLE tbmiembros
+ADD CONSTRAINT fk_familia
+FOREIGN KEY (id_familia)
+REFERENCES tbfamilias(id_fam);
+
+
+

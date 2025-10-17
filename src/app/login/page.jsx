@@ -1,10 +1,10 @@
 
-import LoginNew from "@/components/LoginNew";
+import LoginCard from "@/components/LoginCard";
 
 const page = () => {
   return (
     <>
-      <LoginNew />
+      <LoginCard />
     </>
   );
 };

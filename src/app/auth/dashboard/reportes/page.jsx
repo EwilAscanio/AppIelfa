@@ -1,9 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CiCreditCard1 } from "react-icons/ci";
-import Swal from "sweetalert2";
-import axios from "axios";
 
 const PageReports = () => {
   const router = useRouter();
@@ -21,8 +18,8 @@ const PageReports = () => {
   // Estado para el código de evento
   const [codigoEvento, setCodigoEvento] = useState("");
 
-  //Estado para la cedula del miembro
-  const [cedulaMiembro, setCedulaMiembro] = useState("");
+  // Estado para la categoría de miembros
+  const [categoria, setCategoria] = useState("Todos");
 
   const handleSubmitEvento = (e) => {
     e.preventDefault();
@@ -68,21 +65,13 @@ const PageReports = () => {
 
         const handleSubmitMiembros = (e) => {
           e.preventDefault();
-    
 
-          // Verificar que las fechas estén presentes
-        if (!cedulaMiembro) {
-          // Redirigir a la página de Miembros
-          router.push(
-            `reportes/miembros`
-          )
-        }else {
-          // Redirigir a la página de Miembros con la cedula del miembro
-          router.push(
-            `reportes/miembros/miembros?cedulaMiembro=${cedulaMiembro}`
+          // Redirigir a la página de Miembros con la categoría seleccionada
+          router.push(            
+            
+            `reportes/miembros?categoria=${categoria}`
+
           );
-        }
-          
       }
 
         // Agregar función para manejar el evento de presionar Enter
@@ -205,24 +194,51 @@ const PageReports = () => {
                 <p className="text-center text-gray-600 mb-4">
                   Mostrar Miembros e Invitados.
                 </p>
-               
-                <div className="mt-2 ">
-                  <input
-                    type="numeric"
-                    placeholder="Cedula del Miembro"
-                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
-                    value={cedulaMiembro}
-                    onChange={(e) => setCedulaMiembro(e.target.value)}
-                  />
-                  
+
+                <div className="mt-4">
+                  <div className="flex flex-row space-x-6 justify-center">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="categoria"
+                        value="Adultos"
+                        checked={categoria === "Adultos"}
+                        onChange={(e) => setCategoria(e.target.value)}
+                        className="mr-3"
+                      />
+                      Adultos
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="categoria"
+                        value="Niños"
+                        checked={categoria === "Niños"}
+                        onChange={(e) => setCategoria(e.target.value)}
+                        className="mr-3"
+                      />
+                      Niños
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="categoria"
+                        value="Todos"
+                        checked={categoria === "Todos"}
+                        onChange={(e) => setCategoria(e.target.value)}
+                        className="mr-3"
+                      />
+                      Todos
+                    </label>
+                  </div>
                 </div>
                 <button
-                  className="col-span-2 w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-hover transition duration-300 flex items-center justify-center mt-2"
+                  className="col-span-2 w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-hover transition duration-300 flex items-center justify-center mt-6"
                   onClick={handleSubmitMiembros}
                 >
                   Mostrar Reporte
                 </button>
-              </div>  
+              </div>
 
             </div>
           </form>

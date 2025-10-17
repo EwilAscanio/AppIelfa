@@ -1,38 +1,44 @@
 "use client";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import Swal from "sweetalert2";
 import ReportePDF from "@/components/reportes/Miembros";
-import { useRouter } from "next/navigation"; // Importar useRouter
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ReporteAsistencia = () => {
-  const router = useRouter(); // Inicializar useRouter
-  const [asistencias, setAsistencias] = useState([]); // Renombrado a `eventos` sería más claro, pero lo dejo por ahora
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoria = searchParams.get('categoria');
+  const [asistencias, setAsistencias] = useState([]);
+  const [miembrosTotales, setMiembrosTotales] = useState([]);
+  const [miembrosAdultos, setMiembrosAdultos] = useState([]);
+  const [miembrosNinos, setMiembrosNinos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/miembro`
+          `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/reportes/miembros`,
+          {
+            params: categoria ? { categoria: categoria } : {}
+          }
         );
-        console.log("Response data.miembros (desde API):", response.data.miembros);
-
-        if (Array.isArray(response.data.miembros)) {
-          console.log("API: response.data.eventos es un array válido.");
-          setAsistencias(response.data.miembros);
-
-        } else {
-          console.log("API: response.data.eventos NO es un array. Se seteará asistencias a []");
-          setAsistencias([]); // Asegura que asistencias siempre sea un array
-          // setTotalAsistentes(0);
+       
+        // Filtrar datos según categoria si existe
+        let miembrosFiltrados = response.data.miembrosTotales;
+        if (categoria === "Adultos") {
+          miembrosFiltrados = response.data.miembrosAdultos;
+        } else if (categoria === "Niños") {
+          miembrosFiltrados = response.data.miembrosNinos;
         }
-        
 
+        setAsistencias(miembrosFiltrados);
+        setMiembrosTotales(response.data.miembrosTotales);
+        setMiembrosAdultos(response.data.miembrosAdultos);
+        setMiembrosNinos(response.data.miembrosNinos);
 
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -55,7 +61,7 @@ const ReporteAsistencia = () => {
             errorMessage = err.message || errorMessage;
             errorTitle = "Error Desconocido";
         }
-        
+
         setError(errorMessage);
         Swal.fire({
           icon: 'error',
@@ -68,7 +74,7 @@ const ReporteAsistencia = () => {
     };
 
     fetchData();
-  }, [router]); // Añadir router a las dependencias
+  }, [categoria]); // Cambiar dependencia a categoria
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -108,13 +114,13 @@ const ReporteAsistencia = () => {
 
         <PDFDownloadLink
           document={
-            <ReportePDF 
+            <ReportePDF
               asistencias={asistencias}
-              totalAsistentes={asistencias.length} 
-              
+              totalAsistentes={asistencias.length}
+
             />
           }
-          fileName={`Reporte_Miembros_${new Date().toISOString().slice(0,10)}.pdf`} 
+          fileName={`Reporte_Miembros_${categoria || 'Todos'}_${new Date().toISOString().slice(0,10)}.pdf`}
           className="bg-primary hover:bg-primary-hover text-white font-medium py-2 px-6 rounded-lg transition-colors"
         >
           {({ loading }) => (
@@ -144,11 +150,17 @@ const ReporteAsistencia = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Fecha de Nacimiento
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Edad
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tipo de Miembro
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {asistencias.length > 0 ? (
-                asistencias.map((miembro) => ( 
+                asistencias.map((miembro) => (
                   <tr key={miembro.cedula_mie}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {miembro.cedula_mie}
@@ -165,12 +177,18 @@ const ReporteAsistencia = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(miembro.fechanacimiento_mie)}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {miembro.edad_actual} años
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {miembro.tipo_mie}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
-                    No se encontraron eventos en el período seleccionado.
+                  <td colSpan="7" className="px-6 py-4 text-center text-sm text-gray-500">
+                    No se encontraron miembros en la categoría seleccionada.
                   </td>
                 </tr>
               )}
@@ -182,10 +200,10 @@ const ReporteAsistencia = () => {
           <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-500">
-                Total de Eventos: {/* Texto ajustado */}
+                Total de Miembros: {/* Texto ajustado */}
               </span>
               <span className="text-lg font-bold text-gray-800">
-                {asistencias.length} {/* Muestra el total de eventos */}
+                {asistencias.length} {/* Muestra el total de miembros */}
               </span>
             </div>
           </div>

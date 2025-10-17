@@ -33,6 +33,12 @@ const Sidebar = ({ isSidebarOpen }) => {
       active: false,
     },
     {
+      icon: <FaPeopleGroup  className="w-5 h-5" />,
+      label: "Familias",
+      path: "/auth/dashboard/familias",
+      active: false,
+    },
+    {
       icon: <FaUsersRectangle className="w-5 h-5" />,
       label: "Asistencia",
       path: "/auth/dashboard/asistencia",
