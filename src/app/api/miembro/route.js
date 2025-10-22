@@ -4,6 +4,9 @@ import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 
 export const GET = async () => {
+
+  console.log("Obteniendo todos los miembros y conteos asociados");
+  
   try {
     if (!conn) {
       throw new Error("No se pudo establecer conexión con la base de datos.");

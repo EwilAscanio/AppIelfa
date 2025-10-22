@@ -1,9 +1,9 @@
 "use client";
-import { FiHome, FiUsers, FiSettings, FiBarChart2 } from "react-icons/fi";
+import { FiHome, FiUsers, FiBarChart2 } from "react-icons/fi";
 import { FaUsersRectangle, FaPeopleGroup  } from "react-icons/fa6";
 import { BiSolidReport } from "react-icons/bi";
 import Link from "next/link";
-import LinkSignout from "@/components/LinkSignout";
+import { MdFamilyRestroom } from "react-icons/md";
 import Image from "next/image"; // Asegúrate de que estás importando Image correctamente
 
 const Sidebar = ({ isSidebarOpen }) => {
@@ -33,7 +33,7 @@ const Sidebar = ({ isSidebarOpen }) => {
       active: false,
     },
     {
-      icon: <FaPeopleGroup  className="w-5 h-5" />,
+      icon: <MdFamilyRestroom   className="w-5 h-5" />,
       label: "Familias",
       path: "/auth/dashboard/familias",
       active: false,

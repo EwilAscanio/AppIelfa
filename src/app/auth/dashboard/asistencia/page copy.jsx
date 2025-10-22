@@ -3,11 +3,11 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import { FaBarcode } from "react-icons/fa";
-import { useForm } from "react-hook-form";
+import { LuSearch } from "react-icons/lu";
+import { useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { RiLoader2Line } from "react-icons/ri";
-import MemberSearch from "@/components/MemberSearch";
 
 const RegistrarAsistencia = () => {
   // Inicialización del hook de enrutamiento de Next.js
@@ -38,20 +38,29 @@ const RegistrarAsistencia = () => {
   const [nombreEvento, setNombreEvento] = useState("");
 
   // Almacena el miembro seleccionado de los resultados de búsqueda, incluyendo 'fecha_nac'.
-  const [selectedMiembro, setSelectedMiembro] = useState(null);
+  const [selectedMiembro, setSelectedMiembro] = useState(null); 
+  // Almacena los resultados de la búsqueda de miembros en tiempo real.
+  const [searchResults, setSearchResults] = useState([]);
   // Lista final de miembros asistentes para el evento (el borrador). Incluye 'fecha_nac'.
-  const [miembros, setMiembros] = useState([]);
+  const [miembros, setMiembros] = useState([]); 
 
   // ESTADO PARA EL MODO DE ANULACIÓN (Override Mode): permite modificar listas cerradas.
-  const [isOverrideMode, setIsOverrideMode] = useState(false);
+  const [isOverrideMode, setIsOverrideMode] = useState(false); 
 
   // Estados de carga para mostrar spinners.
   const [isLoadingEvento, setIsLoadingEvento] = useState(false);
+  const [isLoadingMiembro, setIsLoadingMiembro] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Estado para indicar si la asistencia del evento ya fue registrada (cerrada).
   const [eventoYaRegistrado, setEventoYaRegistrado] = useState(false);
 
+  // Observa el valor del campo de búsqueda de miembros en tiempo real.
+  const watchedSearchTerm = useWatch({ control, name: 'searchTermMiembro' });
 
+  // Referencias para manejar el "debounce" (retraso) en la búsqueda y evitar llamadas excesivas a la API.
+  const debounceTimerRef = useRef(null);
+  // Ref para evitar que el useEffect de búsqueda se dispare cuando se establece el valor de un miembro seleccionado.
+  const isSettingValueRef = useRef(false);
 
 
   // ===================================================================
@@ -137,7 +146,7 @@ const RegistrarAsistencia = () => {
   const cargarBorradorAsistencia = useCallback(async (codigo) => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/asistencia/borrador/${codigo}`);
-      
+      console.log("Respuesta del borrador:", res);
       if (res.data && Array.isArray(res.data) && res.data.length > 0) {
         // Mapea los datos del borrador, asumiendo que vienen con 'fecha_nac'.
         setMiembros(res.data.map(m => ({
@@ -163,9 +172,84 @@ const RegistrarAsistencia = () => {
   }, []);
 
 
-  // Callback para cuando se selecciona un miembro
-  const handleMemberSelect = (miembro) => {
-    setSelectedMiembro(miembro);
+  /**
+   * Hook useEffect para manejar la búsqueda de miembros en tiempo real (debounced search).
+   * Se ejecuta cada vez que 'watchedSearchTerm' cambia después de un breve retraso.
+   */
+  useEffect(() => {
+    // Evita la ejecución si el valor se está configurando programáticamente (al seleccionar un miembro).
+    if (isSettingValueRef.current) {
+      return;
+    }
+    // Resetea los resultados de búsqueda y el miembro seleccionado al iniciar una nueva búsqueda.
+    setSearchResults([]);
+    setSelectedMiembro(null);
+    // Limpia el temporizador anterior.
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    const searchTerm = watchedSearchTerm?.trim();
+
+    // No inicia la búsqueda si el término es muy corto.
+    if (!searchTerm || searchTerm.length < 4) {
+      setIsLoadingMiembro(false);
+      return;
+    }
+
+    setIsLoadingMiembro(true);
+    // Establece el nuevo temporizador de debounce.
+    debounceTimerRef.current = setTimeout(async () => {
+      try {
+        // Llama a la API de búsqueda de miembros.
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/asistencia?query=${(searchTerm)}`
+        );
+        console.log("Respuesta de la búsqueda:", res);
+        console.log("Término de búsqueda:", searchTerm);
+        
+        if (res.status === 200 && Array.isArray(res.data)) {
+          setSearchResults(res.data);
+        } else {
+          setSearchResults([]);
+        }
+      } catch (error) {
+        console.error("Error buscando miembro en tiempo real:", error);
+        setSearchResults([]);
+      } finally {
+        setIsLoadingMiembro(false);
+      }
+    }, 500); // Retraso de 500ms
+
+    // Función de limpieza que se ejecuta al desmontar o antes de un nuevo cambio.
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [watchedSearchTerm]); // Dependencia: el término de búsqueda observado.
+
+
+  /**
+   * Selecciona un miembro de la lista de resultados de búsqueda, actualiza el campo de entrada 
+   * con su cédula/nombre y limpia los resultados.
+   */
+  const seleccionarMiembro = (miembro) => {
+    isSettingValueRef.current = true;
+    setSelectedMiembro(miembro); 
+    // Muestra la cédula o nombre del miembro en el campo de búsqueda.
+    setValue("searchTermMiembro", miembro.cedula_mie || miembro.nombre_mie, { shouldValidate: true });
+    setSearchResults([]);
+    // Restablece la ref para permitir futuras búsquedas.
+    setTimeout(() => {
+      isSettingValueRef.current = false;
+    }, 50);
+  };
+
+  // Limpia el estado del miembro seleccionado y los resultados de búsqueda.
+  const resetMemberSearchState = () => {
+    setSelectedMiembro(null);
+    setSearchResults([]);
   };
 
   /**
@@ -174,7 +258,7 @@ const RegistrarAsistencia = () => {
    */
   const agregarMiembro = async () => {
     // 1. Validación de modo de anulación.
-    if (eventoYaRegistrado && !isOverrideMode) {
+    if (eventoYaRegistrado && !isOverrideMode) { 
       Swal.fire({
         title: "Acción No Permitida",
         text: "No puedes agregar miembros porque la asistencia para este evento ya fue registrada. Habilita el modo de modificación si es necesario.",
@@ -196,9 +280,9 @@ const RegistrarAsistencia = () => {
     }
 
     // Extrae los datos del miembro seleccionado.
-    const {
-        id_mie: id,
-        nombre_mie: nombre,
+    const { 
+        id_mie: id, 
+        nombre_mie: nombre, 
         cedula_mie: cedulaMiembro,
         fecha_nac_mie: fechaNacimiento // Se extrae la fecha de nacimiento (asumido en la API de búsqueda).
     } = selectedMiembro;
@@ -214,6 +298,8 @@ const RegistrarAsistencia = () => {
         icon: "error",
         confirmButtonColor: "#d33",
       });
+      resetMemberSearchState();
+      setValue("searchTermMiembro", "");
       return;
     }
 
@@ -223,13 +309,13 @@ const RegistrarAsistencia = () => {
         codigo_eve,
         id_mie: id,
       });
-
+      
       // 5. Actualización del estado local 'miembros' con la fecha de nacimiento.
       setMiembros((prevMiembros) => [
         ...prevMiembros,
-        {
-            cedula: cedulaMiembro,
-            nombre: nombre,
+        { 
+            cedula: cedulaMiembro, 
+            nombre: nombre, 
             id_mie: id,
             fecha_nac: fechaNacimiento // <-- Incluido en el estado para el resumen de edad
         },
@@ -238,6 +324,10 @@ const RegistrarAsistencia = () => {
       console.error("Error al agregar miembro al borrador:", error);
       Swal.fire("Error", "No se pudo agregar el miembro al borrador en la base de datos.", "error");
     }
+
+    // 6. Limpieza y reinicio del estado de búsqueda.
+    resetMemberSearchState();
+    setValue("searchTermMiembro", "");
   };
 
   /**
@@ -629,21 +719,70 @@ const RegistrarAsistencia = () => {
           {/* Sección de Búsqueda y Lista de Miembros (Visible si el evento está cargado y permite edición) */}
           {eventoCargado && (!eventoYaRegistrado || isOverrideMode) && (
             <>
-              {/* Componente de Búsqueda de Miembro */}
-              <MemberSearch
-                control={control}
-                register={register}
-                setValue={setValue}
-                name="searchTermMiembro"
-                label="Buscar Miembro por Cédula o Nombre"
-                placeholder="Ingrese cédula o nombre del miembro"
-                required={true}
-                onMemberSelect={handleMemberSelect}
-                onAddClick={agregarMiembro}
-                addButtonText="Agregar"
-                showSelectedDisplay={true}
-                showAddButton={true}
-              />
+              {/* Campo de Búsqueda de Miembro */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="searchTermMiembro">
+                  Buscar Miembro por Cédula o Nombre <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <LuSearch
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
+                    <input
+                      id="searchTermMiembro"
+                      type="text"
+                      placeholder="Ingrese cédula o nombre del miembro"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      {...register("searchTermMiembro", {})}
+                      disabled={isLoadingMiembro}
+                      onKeyDown={(e) => {
+                        // Permite agregar miembro presionando Enter si ya hay uno seleccionado
+                        if (e.key === 'Enter' && selectedMiembro) {
+                          e.preventDefault();
+                          agregarMiembro();
+                        }
+                      }}
+                    />
+                    {isLoadingMiembro && (
+                      <LuSearch className="animate-spin absolute right-3 top-1/2 transform -translate-y-1/2 text-primary" size={20} />
+                    )}
+                  </div>
+
+                  {/* Display del miembro seleccionado */}
+                  {selectedMiembro && (
+                    <div className="ml-4 flex-1 text-gray-700 p-2 border border-gray-300 rounded-lg bg-gray-50">
+                      <p className="text-xs font-medium text-gray-500">Miembro Seleccionado:</p>
+                      <p className="text-sm font-semibold">{selectedMiembro.nombre_mie} (ID: {selectedMiembro.id_mie})</p>
+                    </div>
+                  )}
+
+                  {/* Botón Agregar Miembro */}
+                  <button
+                    type="button"
+                    onClick={agregarMiembro}
+                    className="bg-green-500 text-white rounded-lg px-4 py-2 hover:bg-green-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!selectedMiembro}
+                  >
+                    Agregar
+                  </button>
+                </div>
+                {/* Resultados de Búsqueda (Dropdown) */}
+                {searchResults.length > 0 && (
+                  <ul className="absolute z-10 w-[calc(50%-4px)] bg-white border border-gray-300 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto">
+                    {searchResults.map((miembro) => (
+                      <li
+                        key={miembro.id_mie}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0"
+                        onClick={() => seleccionarMiembro(miembro)}
+                      >
+                        <span className="font-semibold">{miembro.nombre_mie}</span> {miembro.cedula_mie}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
 
               {/* Tabla de Miembros Agregados */}

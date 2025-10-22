@@ -12,8 +12,12 @@ export const conn = new Pool({
   idleTimeoutMillis: 30000,    // Cierra conexiones inactivas después de 30s (menos que 5 min)
   connectionTimeoutMillis: 5000, // Tiempo máximo para establecer conexión
   max: 5,                      // Máximo de conexiones en el pool
-  ssl: {
-    rejectUnauthorized: false, 
-  },
+
+  ssl: false 
+
 });
 
+
+// ssl: {
+//   rejectUnauthorized: false, 
+// },

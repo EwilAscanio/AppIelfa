@@ -140,18 +140,18 @@ ADD CONSTRAINT unique_cedula UNIQUE (cedula_mie);
 
 CREATE TABLE tbfamilias (
     id_fam SERIAL PRIMARY KEY,
-    id_jefe_fam INT NOT NULL REFERENCES tbmiembros(id_mie) UNIQUE, 
+    cedula_jefe_fam INT NOT NULL REFERENCES tbmiembros(cedula_mie) UNIQUE, 
     nombre_fam VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE tbmiembros
-ADD COLUMN id_familia INT,
+ADD COLUMN id_fam INT,
 ADD COLUMN parentesco VARCHAR(50);
 
 ALTER TABLE tbmiembros
 ADD CONSTRAINT fk_familia
-FOREIGN KEY (id_familia)
+FOREIGN KEY (id_fam)
 REFERENCES tbfamilias(id_fam);
 
 

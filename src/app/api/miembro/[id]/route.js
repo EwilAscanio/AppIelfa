@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 
 export const GET = async (request, { params }) => {
+  console.log("Obteniendo miembro con cédula:", params.id);
+  
   try {
     const { id: cedula } = params;
 
