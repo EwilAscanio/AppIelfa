@@ -3,18 +3,17 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-// Esta función sigue siendo la misma para cargar los usuarios
+
 const loadUsers = async () => {
   try {
-    // CORRECCIÓN: Usar siempre la URL absoluta para las llamadas a la API en Componentes de Servidor.
-    // Esto asegura que la llamada funcione durante el `build` y en producción.
+
     const { data } = await axios.get(
       `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/usuarios`
     );
     return data;
   } catch (error) {
     console.error("Error al cargar usuarios:", error);
-    return []; // Retorna un array vacío en caso de error para evitar que la aplicación falle
+    return []; 
   }
 };
 
