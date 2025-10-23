@@ -1,9 +1,9 @@
 import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 
-export const GET = async (req) => {
+export const dynamic = 'force-dynamic';// Esto hace que el contenido sea dinámico (Forzado)
 
-  console.log("Iniciando búsqueda de miembros");
+export const GET = async (req) => {
   
   try {
     const { searchParams } = new URL(req.url);
