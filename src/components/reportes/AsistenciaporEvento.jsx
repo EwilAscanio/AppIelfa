@@ -183,6 +183,12 @@ const styles = StyleSheet.create({
 });
 
 const AsistenciaEvento = ({ asistencias, totalAsistentes, conteoNinosEnAsistencia }) => {
+
+  console.log("Generando PDF con asistencias:", asistencias);
+  console.log("Total de Asistentes:", totalAsistentes);
+  console.log("Total de Niños en Asistencia:", conteoNinosEnAsistencia);
+
+  
   const nombreEmpresa = process.env.NEXT_PUBLIC_NOMBRE_EMPRESA;
   const direccionEmpresa = process.env.NEXT_PUBLIC_DIRECCION_EMPRESA;
 

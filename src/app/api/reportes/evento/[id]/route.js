@@ -14,10 +14,6 @@ export const GET = async (request) => {
       );
     }
 
-    // ✅ En PostgreSQL, puedes comparar fechas directamente si el campo es DATE
-    // Si `fecha_eve` es TIMESTAMP, puedes usar rangos con $1 y $2 como fechas ISO
-    // Ej: '2024-01-01' y '2024-01-31' → PostgreSQL las convierte automáticamente
-
     const result = await conn.query(
       `SELECT * FROM tbeventos 
        WHERE fecha_eve >= $1 AND fecha_eve <= $2`,
@@ -29,7 +25,7 @@ export const GET = async (request) => {
     if (eventos.length === 0) {
       return NextResponse.json(
         { message: "No se encontraron eventos para las fechas proporcionadas." },
-        { status: 200 } // 👈 200 es mejor que 404 si la consulta es válida pero sin resultados
+        { status: 200 } 
       );
     }
 

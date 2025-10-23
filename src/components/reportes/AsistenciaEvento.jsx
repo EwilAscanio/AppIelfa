@@ -4,7 +4,7 @@ import {
   View,
   Document,
   StyleSheet,
-  // Image, // Si no usas Image con Logo, puedes quitarlo para aligerar
+  // Image,
 } from "@react-pdf/renderer";
 
 // Define la cantidad de ítems que deseas por cada hoja
@@ -68,35 +68,35 @@ const styles = StyleSheet.create({
   },
   // ESTILOS DE CABECERA DE COLUMNA AJUSTADOS
 
+  tableColHeaderNombre: {
+    width: "25%",
+    padding: 8,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 9,
+  },
   tableColHeaderCedula: {
-    width: "12%",
-    padding: 8,
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 9,
-  },
-  tableColHeaderNombreMiembro: {
-    width: "18%",
-    padding: 8,
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 9,
-  },
-  tableColHeaderTipoMiembro: {
     width: "15%",
     padding: 8,
     textAlign: "center",
     fontWeight: "bold",
     fontSize: 9,
   },
-  tableColHeaderCantidadEeventos: {
-    width: "15%", // ¡COLUMNA MÁS ANCHA!
+  tableColHeaderTipo: {
+    width: "15%",
     padding: 8,
     textAlign: "center",
     fontWeight: "bold",
     fontSize: 9,
   },
-  tableColHeaderNombreEventos: {
+  tableColHeaderTotal: {
+    width: "15%",
+    padding: 8,
+    textAlign: "center",
+    fontWeight: "bold",
+    fontSize: 9,
+  },
+  tableColHeaderEventos: {
     width: "30%",
     padding: 8,
     textAlign: "center",
@@ -105,34 +105,34 @@ const styles = StyleSheet.create({
   },
 
   // ESTILOS DE CELDA DE CONTENIDO AJUSTADOS
+  tableColNombre: {
+    width: "25%",
+    padding: 8,
+    textAlign: "center",
+    fontSize: 8,
+  },
   tableColCedula: {
     width: "15%",
     padding: 8,
     textAlign: "center",
     fontSize: 8,
   },
-  tableColNombreMiembro: {
-    width: "18%",
-    padding: 8,
-    textAlign: "center",
-    fontSize: 8,
-  },
-  tableColTipoMiembro: {
+  tableColTipo: {
     width: "15%",
     padding: 8,
     textAlign: "center",
     fontSize: 8,
   },
-  tableColCantidadEventos: {
+  tableColTotal: {
     width: "15%",
     padding: 8,
     textAlign: "center",
     fontSize: 8,
   },
-  tableColNombreEventos: {
-    width: "40%", // ¡COLUMNA MÁS ANCHA!
+  tableColEventos: {
+    width: "30%",
     padding: 8,
-    textAlign: "center", // Puedes ajustar a "left" si prefieres que el nombre quede alineado a la izquierda
+    textAlign: "center",
     fontSize: 8,
   },
 
@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
 });
 
 const AsistenciaEvento = ({ asistencias, totalAsistentes, rangoFechas }) => {
+
   const nombreEmpresa = process.env.NEXT_PUBLIC_NOMBRE_EMPRESA;
   const direccionEmpresa = process.env.NEXT_PUBLIC_DIRECCION_EMPRESA;
 
@@ -218,7 +219,7 @@ const AsistenciaEvento = ({ asistencias, totalAsistentes, rangoFechas }) => {
           </View>
           
           <View style={styles.title}>
-                    <Text>Reporte de Asistencia a Eventos</Text>
+                    <Text>Reporte de Eventos</Text>
                   </View>
                   {rangoFechas && (
                     <Text style={styles.rangoFechas}>
@@ -228,24 +229,23 @@ const AsistenciaEvento = ({ asistencias, totalAsistentes, rangoFechas }) => {
 
           <View style={styles.table}>
             <View style={[styles.tableRow, styles.tableHeaderRow]}>
-              
-              <Text style={styles.tableColHeaderCedula}>Cedula</Text>
-                          <Text style={styles.tableColHeaderNombreMiembro}>Nombre Miembro</Text>
-                          <Text style={styles.tableColHeaderTipoMiembro}>Tipo Miembro</Text>
-                          <Text style={styles.tableColHeaderCantidadEeventos}>Cant Eventos</Text>
-                          <Text style={styles.tableColHeaderNombreEventos}>Nombres Eventos</Text>
+
+              <Text style={styles.tableColHeaderNombre}>Nombre Miembro</Text>
+              <Text style={styles.tableColHeaderCedula}>Cédula</Text>
+              <Text style={styles.tableColHeaderTipo}>Tipo Miembro</Text>
+              <Text style={styles.tableColHeaderTotal}>Total Eventos Asistidos</Text>
+              <Text style={styles.tableColHeaderEventos}>Eventos Asistidos</Text>
             </View>
 
             {pageAsistencias && pageAsistencias.length > 0 ? (
               pageAsistencias.map((registroAsistencia, index) => (
-                <View key={registroAsistencia.id_mie || `${pageIndex}-${index}`} style={styles.tableRow}>
-                
+                <View key={registroAsistencia.cedula_mie || `${pageIndex}-${index}`} style={styles.tableRow}>
+
+                  <Text style={styles.tableColNombre}>{registroAsistencia.nombre_mie}</Text>
                   <Text style={styles.tableColCedula}>{registroAsistencia.cedula_mie}</Text>
-                  <Text style={styles.tableColNombreMiembro}>{registroAsistencia.nombre_mie}</Text>
-                  
-                  <Text style={styles.tableColTipoMiembro}>{registroAsistencia.tipo_mie}</Text>
-                  <Text style={styles.tableColCantidadEventos}>{registroAsistencia.total_eventos_asistidos}</Text>
-                  <Text style={styles.tableColNombreEventos}>{registroAsistencia.eventos_asistidos}</Text>
+                  <Text style={styles.tableColTipo}>{registroAsistencia.tipo_mie}</Text>
+                  <Text style={styles.tableColTotal}>{registroAsistencia.total_eventos_asistidos}</Text>
+                  <Text style={styles.tableColEventos}>{registroAsistencia.eventos_asistidos}</Text>
                 </View>
               ))
             ) : (

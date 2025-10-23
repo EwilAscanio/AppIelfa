@@ -4,19 +4,18 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import Swal from "sweetalert2";
-// Asegúrate de que el path a tu componente PDF sea correcto
 import ReportePDF from "@/components/reportes/AsistenciaporEvento";
 import { useRouter } from "next/navigation";
 
 const ReporteAsistencia = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [asistencias, setAsistencias] = useState([]); // Aquí se almacenarán los registros de asistencia
+  const [asistencias, setAsistencias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [totalAsistentes, setTotalAsistentes] = useState(0); // Para el conteo total de asistentes
-  const [conteoNinosEnAsistencia, setConteoNinosEnAsistencia] = useState(0); // Para el conteo de niños en asistencia
-  const [codigoEvento, setCodigoEvento] = useState("");
+  const [totalAsistentes, setTotalAsistentes] = useState(0); 
+  const [conteoNinosEnAsistencia, setConteoNinosEnAsistencia] = useState(0); 
+  //const [codigoEvento, setCodigoEvento] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {

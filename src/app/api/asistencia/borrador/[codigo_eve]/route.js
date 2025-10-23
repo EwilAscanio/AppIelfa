@@ -1,36 +1,6 @@
 import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 
-// GET: Obtener todos los miembros del borrador para un evento específico
-// export async function GET(request, { params }) {
-//   try {
-//     const { codigo_eve } = params;
-
-//     if (!codigo_eve) {
-//       return NextResponse.json(
-//         { message: "El código de evento es requerido" },
-//         { status: 400 }
-//       );
-//     }
-
-//     const result = await conn.query(
-//       `SELECT b.id_mie, m.nombre_mie as nombre, m.cedula_mie as cedula
-//        FROM tbasistencia_borrador b
-//        JOIN tbmiembros m ON b.id_mie = m.id_mie
-//        WHERE b.codigo_eve = ?`,
-//       [codigo_eve]
-//     );
-
-//     return NextResponse.json(result);
-//   } catch (error) {
-//     console.error("Error en GET de borrador:", error);
-//     return NextResponse.json(
-//       { message: "Error interno del servidor" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
 export const GET = async (request, { params }) => {
   
   try {

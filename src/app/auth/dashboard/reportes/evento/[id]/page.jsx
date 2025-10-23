@@ -5,16 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import Swal from "sweetalert2";
 import ReportePDF from "@/components/reportes/AsistenciaEvento";
-import { useRouter } from "next/navigation"; // Importar useRouter
+import { useRouter } from "next/navigation";
 
 const ReporteAsistencia = () => {
-  const router = useRouter(); // Inicializar useRouter
+  const router = useRouter(); 
   const searchParams = useSearchParams();
-  const [asistencias, setAsistencias] = useState([]); // Renombrado a `eventos` sería más claro, pero lo dejo por ahora
+  const [asistencias, setAsistencias] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // No necesitamos totalAsistentes si el reporte es de eventos, usaremos asistencias.length
-  // const [totalAsistentes, setTotalAsistentes] = useState(0);
   const [rangoFechas, setRangoFechas] = useState("");
 
   useEffect(() => {
@@ -43,7 +41,7 @@ const ReporteAsistencia = () => {
             title: 'Rango inválido',
             text: 'La fecha final no puede ser anterior a la fecha inicial',
           });
-          setLoading(false); // IMPORTANTE: Detener loading aquí también
+          setLoading(false);
           return;
         }
 
@@ -55,22 +53,18 @@ const ReporteAsistencia = () => {
         if (Array.isArray(response.data.eventos)) {
           console.log("API: response.data.eventos es un array válido.");
           setAsistencias(response.data.eventos);
-          // Actualizamos totalAsistentes (ahora sería total de eventos)
-          // setTotalAsistentes(response.data.eventos.length);
+
         } else {
           console.log("API: response.data.eventos NO es un array. Se seteará asistencias a []");
-          setAsistencias([]); // Asegura que asistencias siempre sea un array
-          // setTotalAsistentes(0);
+          setAsistencias([]);
         }
-        
-        // ¡LA LÍNEA PROBLEMÁTICA HA SIDO ELIMINADA DE AQUÍ!
-        // setAsistencias(response.data.eventos); // <-- ELIMINAR ESTA LÍNEA
 
-        setRangoFechas(`${fechaInicial} al ${fechaFinal}`); // Ahora sí, descomenta y usa esto
+
+        setRangoFechas(`${fechaInicial} al ${fechaFinal}`);
 
       } catch (err) {
         console.error("Error fetching data:", err);
-        console.error("Error response details:", err.response); // Más detallado
+        console.error("Error response details:", err.response); 
 
         let errorMessage = "Ocurrió un error al cargar el reporte.";
         let errorTitle = "Error en el Reporte";
@@ -102,7 +96,7 @@ const ReporteAsistencia = () => {
     };
 
     fetchData();
-  }, [searchParams, router]); // Añadir router a las dependencias
+  }, [searchParams, router]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";

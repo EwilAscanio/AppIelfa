@@ -2,6 +2,8 @@ import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 
 export const GET = async (request) => {
+  console.log("Solicitud recibida para el reporte de asistencia por evento.");
+  
   try {
 
     const { searchParams } = new URL(request.url);
