@@ -2,8 +2,6 @@
 import Link from "next/link";
 import { loadFamilias } from "@/libs/familias";
 
-
-
 const FamiliasPage = async () => {
   const familias = await loadFamilias();
 

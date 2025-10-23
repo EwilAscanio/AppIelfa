@@ -12,7 +12,7 @@ const ChartComponent = () => {
     const monthNames = [
       "Ene", "Feb", "Mar", "Abr", "May", "Jun",
       "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
-    ]; // Mover dentro del useEffect
+    ]; 
 
     const fetchChartData = async () => {
       setLoading(true); // Inicia el estado de carga

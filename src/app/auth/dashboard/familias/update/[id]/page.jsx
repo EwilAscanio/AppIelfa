@@ -214,10 +214,9 @@ const UpdateFamiliaPage = ({ params }) => {
                               onChange={(e) => updateParentesco(miembro.cedula, e.target.value)}
                               className="border border-gray-300 rounded px-2 py-1 text-sm w-full"
                             >
+                              <option value="Cónyuge">Cónyuge</option>
                               <option value="Hijo/a">Hijo/a</option>
-                              <option value="Esposo/a">Esposo/a</option>
-                              <option value="Padre">Padre</option>
-                              <option value="Madre">Madre</option>
+                              <option value="Padre/Madre">Padre/Madre</option>
                               <option value="Hermano/a">Hermano/a</option>
                               <option value="Otro">Otro</option>
                             </select>

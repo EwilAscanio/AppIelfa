@@ -56,7 +56,7 @@ const RegisterFamily = () => {
 
   // Clase base para los estilos de los inputs
   const baseInputClass = "w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200";
-  const baseSelectClass = "w-full pl-3 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 appearance-none";
+  //const baseSelectClass = "w-full pl-3 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200 appearance-none";
   const baseInputIconClass = "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400";
 
 
@@ -208,6 +208,7 @@ const RegisterFamily = () => {
             <option value="Cónyuge">Cónyuge</option>
             <option value="Hijo/a">Hijo/a</option>
             <option value="Padre/Madre">Padre/Madre</option>
+            <option value="Hermano/a">Hermano/a</option>
             <option value="Otro">Otro</option>
           </select>
         </div>

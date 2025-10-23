@@ -80,7 +80,7 @@ const AdminDashboard = () => {
               {loading ? (
                 <span className="inline-block h-8 w-20 bg-white bg-opacity-20 rounded animate-pulse"></span>
               ) : (
-                item.value !== null ? item.value : "0" // Muestra 0 si es null
+                item.value !== null ? item.value : "0" 
               )}
             </p>
             <p className="text-white text-sm mt-2 bg-white bg-opacity-20 inline-block px-2 py-1 rounded-full">
