@@ -74,8 +74,7 @@ const ReporteAsistencia = () => {
     };
 
     fetchData();
-  }, [categoria]); // Cambiar dependencia a categoria
-
+  }, [categoria]); 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -214,3 +213,5 @@ const ReporteAsistencia = () => {
 };
 
 export default ReporteAsistencia;
+
+export const dynamic = 'force-dynamic';
