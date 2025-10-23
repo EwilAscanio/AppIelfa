@@ -1,4 +1,5 @@
 //falta server db
+// Importa la conexión a la base de datos
 import { NextResponse } from "next/server";
 
 export const GET = async (req) => {
