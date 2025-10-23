@@ -13,7 +13,11 @@ export const conn = new Pool({
   connectionTimeoutMillis: 5000, // Tiempo máximo para establecer conexión
   max: 5,                      // Máximo de conexiones en el pool
 
-  ssl: false 
+  //ssl: false
+  
+  ssl: {
+       rejectUnauthorized: false, 
+ },
 
 });
 
