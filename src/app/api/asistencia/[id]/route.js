@@ -1,4 +1,4 @@
-import { conn } from "@/libs/mariadb";
+//falta server db
 import { NextResponse } from "next/server";
 
 export const GET = async (req) => {

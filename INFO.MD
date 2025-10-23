@@ -18,3 +18,6 @@ DB_USER=dbappielfa_user
 DB_PASSWORD=Su5BwS3Uq5ki3WKFRrIHjmwMgruVnKTz
 DB_PORT=5432
 DB_NAME=dbappielfa
+
+Datos aiven
+psql 'postgres://avnadmin:AVNS_WYKREnMsCJhPdEzgaYC@appielfa-appielfa.i.aivencloud.com:27017/defaultdb?sslmode=require'

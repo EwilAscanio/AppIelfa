@@ -1,4 +1,4 @@
-import { conn } from "@/libs/mariadb";
+//falta importar la conexion a la base de datos
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
