@@ -1,5 +1,4 @@
-//falta server db
-// Importa la conexión a la base de datos
+import { conn } from "@/libs/postgress";
 import { NextResponse } from "next/server";
 
 export const GET = async (req) => {
