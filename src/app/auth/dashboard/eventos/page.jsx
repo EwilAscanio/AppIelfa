@@ -6,6 +6,7 @@ import Link from "next/link";
  * @param {string} dateString - La fecha en formato de cadena.
  * @returns {string} - La fecha formateada o un texto indicando invalidez/ausencia.
  */
+
 const formatDate = (dateString) => {
   if (!dateString) return "Fecha no disponible"; // Manejar fechas nulas o vacías
   const date = new Date(dateString);

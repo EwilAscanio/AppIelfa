@@ -17,3 +17,5 @@ const ReporteMiembro = () => {
 };
 
 export default ReporteMiembro;
+
+export const dynamic = 'force-dynamic';
