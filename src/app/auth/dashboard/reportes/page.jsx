@@ -21,6 +21,11 @@ const PageReports = () => {
   // Estado para la categoría de miembros
   const [categoria, setCategoria] = useState("Todos");
 
+   // Estado para la categoría de miembros
+   const [categoriaFamilias, setCategoriaFamilias] = useState("Todas");
+
+
+
   const handleSubmitEvento = (e) => {
     e.preventDefault();
     // Verificar que las fechas estén presentes
@@ -73,6 +78,15 @@ const PageReports = () => {
 
           );
       }
+
+      const handleSubmitFamilias = (e) => {
+        e.preventDefault();
+
+        // Redirigir a la página de Familias con la categoría seleccionada
+        router.push(
+          `reportes/familias?categoria=${categoriaFamilias}`
+        );
+    }
 
         // Agregar función para manejar el evento de presionar Enter
         const handleCodigoEventoKeyDown = (event) => {
@@ -239,6 +253,37 @@ const PageReports = () => {
                   Mostrar Reporte
                 </button>
               </div>
+
+                            {/* Reporte Número 5 Reporte de Familias */}
+                            <div className="relative border border-gray-300 rounded-lg p-4">
+                <p className="text-center text-gray-600 mb-4">
+                  Mostrar Familias.
+                </p>
+
+                <div className="mt-4">
+                  <div className="flex flex-row space-x-6 justify-center">
+                      
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="categoria"
+                        value="Todas"
+                        checked={categoriaFamilias === "Todas"}
+                        onChange={(e) => setCategoriaFamilias(e.target.value)}
+                        className="mr-3"
+                      />
+                      Todas
+                    </label>
+                  </div>
+                </div>
+                <button
+                  className="col-span-2 w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-hover transition duration-300 flex items-center justify-center mt-6"
+                  onClick={handleSubmitFamilias}
+                >
+                  Mostrar Reporte
+                </button>
+              </div>
+
 
             </div>
           </form>
