@@ -85,7 +85,7 @@ const MemberSearch = ({
       try {
         // Llama a la API de búsqueda de miembros.
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/miembro/search?query=${encodeURIComponent(searchTerm)}`
+          `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/miembro/search?query=${encodeURIComponent(searchTerm)}`
         );
 
         if (res.status === 200 && Array.isArray(res.data)) {
