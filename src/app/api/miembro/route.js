@@ -51,6 +51,32 @@ export const GET = async () => {
       WHERE EXTRACT(YEAR FROM AGE(fechanacimiento_mie)) < 10
     `);
 
+     // ✅ 🎂 Cumpleañeros HOY (día y mes actuales)
+     const todayCumplesResult = await conn.query(`
+      SELECT
+        *,
+        EXTRACT(YEAR FROM AGE(fechanacimiento_mie))::INTEGER AS edad_actual
+      FROM tbmiembros
+      WHERE
+        EXTRACT(MONTH FROM fechanacimiento_mie) = EXTRACT(MONTH FROM CURRENT_DATE)
+        AND EXTRACT(DAY FROM fechanacimiento_mie) = EXTRACT(DAY FROM CURRENT_DATE)
+      ORDER BY nombre_mie ASC
+    `);
+
+    // ✅ 🎉 Cumpleañeros del MES ACTUAL (cualquier día de este mes)
+    const monthCumplesResult = await conn.query(`
+      SELECT
+        *,
+        EXTRACT(YEAR FROM AGE(fechanacimiento_mie))::INTEGER AS edad_actual,
+        EXTRACT(DAY FROM fechanacimiento_mie)::INTEGER AS dia_cumple
+      FROM tbmiembros
+      WHERE
+        EXTRACT(MONTH FROM fechanacimiento_mie) = EXTRACT(MONTH FROM CURRENT_DATE)
+      ORDER BY
+        dia_cumple ASC, nombre_mie ASC
+    `);
+
+
     // Formatear resultados
     const genderCounts = genderCountResult.rows.reduce((acc, current) => {
       acc[current.sexo_mie] = current.count;
@@ -63,6 +89,8 @@ export const GET = async () => {
     }, {});
 
     const childrenCount = childrenCountResult.rows[0]?.count || 0;
+    const cumpleanerosDelDia = todayCumplesResult.rows;
+    const cumpleanerosDelMes = monthCumplesResult.rows;
 
     return NextResponse.json({
       miembros: members,
@@ -70,6 +98,8 @@ export const GET = async () => {
       conteoPorTipoMiembro: memberTypeCounts,
       conteoDeNinos: childrenCount,
       totalMiembros: members.length,
+      cumpleanerosDelDia,
+      cumpleanerosDelMes,
     });
   } catch (error) {
     console.error("Error al obtener miembros y conteos:", error);

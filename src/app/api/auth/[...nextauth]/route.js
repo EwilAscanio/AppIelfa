@@ -29,7 +29,7 @@ export const authOptions = {
         try {
           const result = await conn.query(
             "SELECT * FROM tbusuarios WHERE login_usr = $1",
-            [credentials.login.trim()]
+            [credentials.login.toLowerCase().trim()]
           );
 
           const user = result.rows[0]; // 👈 Aquí está la clave
@@ -51,11 +51,11 @@ export const authOptions = {
 
           // ✅ Devuelve el usuario (NextAuth lo requiere con id y email)
           return {
-            id: user.id_usr.toString(), // 👈 NextAuth espera id como string
+            id: user.id_usr.toString(),
             name: user.nombre_usr,
             login: user.login_usr,
             email: user.email_usr,
-            role: user.id_rol, // 👈 Corregido: tu columna es id_rol, no rol_usr
+            role: user.id_rol,
             image: user.imagen_usr
           };
 

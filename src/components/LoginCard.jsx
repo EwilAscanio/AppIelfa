@@ -7,7 +7,6 @@ import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import Link from "next/link";
 
 const LoginCard = () => {
   const [showPassword, setShowPassword] = useState(false);

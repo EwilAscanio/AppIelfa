@@ -98,25 +98,25 @@ const PageReports = () => {
   return (
     <>
       <div className="flex justify-around"></div>
-      <div className="flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-4xl w-full">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">
+      <div className="flex items-center justify-center p-2 sm:p-4">
+        <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 lg:p-8 max-w-4xl w-full">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Reportes del Sistema
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">
               Escoge que reporte desea visualizar
             </p>
           </div>
 
           {/* Mensaje de error */}
-          <div className="absolute top-0 left-0 right-0">
-            {error && <p className="text-red-500 text-center">{error}</p>}
+          <div className="mb-4">
+            {error && <p className="text-red-500 text-center text-sm">{error}</p>}
           </div>
 
           {/* Formulario para los reportes */}
           <form className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               {/* Reporte Número 1 Resumen de Eventos */}
               <div className="relative border border-gray-300 rounded-lg p-4">
@@ -124,18 +124,18 @@ const PageReports = () => {
                   Mostrar Eventos.
                 </p>
                
-                <div className="mt-2 grid grid-cols-2 gap-4">
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="date"
                     placeholder="Fecha Inicial"
-                    className="w-40 pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary text-sm"
                     value={fechaIncialEvento}
                     onChange={(e) => setFechaIncialEvento(e.target.value)}
                   />
                   <input
                     type="date"
                     placeholder="Fecha Final"
-                    className="w-40 pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary text-sm"
                     value={fechaFinalEvento}
                     onChange={(e) => setFechaFinalEvento(e.target.value)}
                   />
@@ -154,18 +154,18 @@ const PageReports = () => {
                   Mostrar Asistencias a Eventos.
                 </p>
                
-                <div className="mt-2 grid grid-cols-2 gap-4">
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="date"
                     placeholder="Fecha Inicial"
-                    className="w-40 pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary text-sm"
                     value={fechaIncialAsistencia}
                     onChange={(e) => setFechaIncialAsistencia(e.target.value)}
                   />
                   <input
                     type="date"
                     placeholder="Fecha Final"
-                    className="w-40 pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary text-sm"
                     value={fechaFinalAsistencia}
                     onChange={(e) => setFechaFinalAsistencia(e.target.value)}
                   />
@@ -188,7 +188,7 @@ const PageReports = () => {
                   <input
                     type="numeric"
                     placeholder="Codigo de Evento"
-                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+                    className="w-full pl-4 pr-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary text-sm"
                     value={codigoEvento}
                     onChange={(e) => setCodigoEvento(e.target.value)}
                     onKeyDown={handleCodigoEventoKeyDown}
@@ -210,8 +210,8 @@ const PageReports = () => {
                 </p>
 
                 <div className="mt-4">
-                  <div className="flex flex-row space-x-6 justify-center">
-                    <label className="flex items-center">
+                  <div className="flex flex-col sm:flex-row sm:space-x-6 sm:justify-center space-y-2 sm:space-y-0">
+                    <label className="flex items-center justify-center sm:justify-start">
                       <input
                         type="radio"
                         name="categoria"
@@ -220,9 +220,9 @@ const PageReports = () => {
                         onChange={(e) => setCategoria(e.target.value)}
                         className="mr-3"
                       />
-                      Adultos
+                      <span className="text-sm">Adultos</span>
                     </label>
-                    <label className="flex items-center">
+                    <label className="flex items-center justify-center sm:justify-start">
                       <input
                         type="radio"
                         name="categoria"
@@ -231,9 +231,9 @@ const PageReports = () => {
                         onChange={(e) => setCategoria(e.target.value)}
                         className="mr-3"
                       />
-                      Niños
+                      <span className="text-sm">Niños</span>
                     </label>
-                    <label className="flex items-center">
+                    <label className="flex items-center justify-center sm:justify-start">
                       <input
                         type="radio"
                         name="categoria"
@@ -242,7 +242,7 @@ const PageReports = () => {
                         onChange={(e) => setCategoria(e.target.value)}
                         className="mr-3"
                       />
-                      Todos
+                      <span className="text-sm">Todos</span>
                     </label>
                   </div>
                 </div>
@@ -261,18 +261,17 @@ const PageReports = () => {
                 </p>
 
                 <div className="mt-4">
-                  <div className="flex flex-row space-x-6 justify-center">
-                      
+                  <div className="flex justify-center">
                     <label className="flex items-center">
                       <input
                         type="radio"
-                        name="categoria"
+                        name="categoriaFamilias"
                         value="Todas"
                         checked={categoriaFamilias === "Todas"}
                         onChange={(e) => setCategoriaFamilias(e.target.value)}
                         className="mr-3"
                       />
-                      Todas
+                      <span className="text-sm">Todas</span>
                     </label>
                   </div>
                 </div>

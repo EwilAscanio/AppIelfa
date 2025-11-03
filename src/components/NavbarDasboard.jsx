@@ -1,9 +1,8 @@
-import { FiMenu, FiMail, FiBell } from "react-icons/fi";
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react"; // 👈 Importa useSession
+import { FiMenu, FiLogOut } from "react-icons/fi";
+import { useSession } from "next-auth/react";
 import PropTypes from "prop-types";
+import Image from "next/image";
 import LinkSignout from "./LinkSignout";
-import Image from "next/image"; 
 
 const NavbarDashboard = ({ toggleSidebar, messages, notifications }) => {
   // 👇 Obtén la sesión directamente (sin axios ni endpoints)
@@ -17,34 +16,58 @@ const NavbarDashboard = ({ toggleSidebar, messages, notifications }) => {
 
   return (
     <header className="bg-white shadow-sm">
-      <div className="flex items-center justify-between px-6 py-4">
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Toggle sidebar"
-        >
-          <FiMenu className="w-6 h-6 text-gray-600" />
-        </button>
+      <div className="grid grid-cols-3 items-center px-4 sm:px-6 py-4">
+        <div className="flex justify-start">
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-600"
+            aria-label="Toggle sidebar"
+          >
+            <FiMenu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+          </button>
+        </div>
 
-        <div className="flex items-center">
-        <Image
-  src={userImage}
-  alt="Profile"
-  // 2. Definimos ancho y alto
-  width={40} 
-  height={40}
-  // 3. Aplicamos clases de estilo. 
-  // 'object-cover' es clave para mantener la imagen dentro de sus límites.
-  className="rounded-full object-cover" 
-/>
-          <div className="ml-3">
-            <p className="font-semibold text-gray-800">{userName}</p>
-            <p className="text-sm text-gray-500">{userRole === 1 ? "Administrador" : "Usuario"}</p>
+        <div className="flex items-center justify-center min-w-0">
+          <Image
+            src={userImage}
+            alt="Profile"
+            width={32}
+            height={32}
+            className="rounded-full object-cover flex-shrink-0 sm:w-10 sm:h-10"
+          />
+          <div className="ml-2 sm:ml-3 min-w-0">
+            <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{userName}</p>
+            <p className="text-xs sm:text-sm text-gray-500 truncate">{userRole === 1 ? "Administrador" : "Usuario"}</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <LinkSignout />
+        <div className="flex justify-end">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              import('sweetalert2').then((Swal) => {
+                Swal.default.fire({
+                  title: "¿Estás seguro?",
+                  text: "Esta acción cerrará tu sesión.",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#2563eb",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "Sí, cerrar sesión",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    import('next-auth/react').then(({ signOut }) => {
+                      signOut({ callbackUrl: "/" });
+                    });
+                  }
+                });
+              });
+            }}
+            className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-600 transition-colors duration-200"
+            aria-label="Logout"
+          >
+            <LinkSignout className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+          </button>
         </div>
       </div>
     </header>

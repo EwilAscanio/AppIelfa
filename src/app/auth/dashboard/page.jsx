@@ -1,9 +1,9 @@
-import Dasboard from "@/components/Dasboard";
+import Dashboard from "@/components/Dashboard";
 
 const page = () => {
   return (
     <>
-      <Dasboard />
+      <Dashboard />
     </>
   );
 };
