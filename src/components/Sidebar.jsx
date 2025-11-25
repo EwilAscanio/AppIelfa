@@ -4,7 +4,7 @@ import { FaUsersRectangle, FaPeopleGroup  } from "react-icons/fa6";
 import { BiSolidReport } from "react-icons/bi";
 import Link from "next/link";
 import { MdFamilyRestroom } from "react-icons/md";
-import Image from "next/image"; // Asegúrate de que estás importando Image correctamente
+import Image from "next/image";
 
 const Sidebar = ({ isSidebarOpen }) => {
   const menuItems = [
@@ -105,10 +105,6 @@ const Sidebar = ({ isSidebarOpen }) => {
           </Link>
         ))}
       </nav>
-
-      {/* <div className="absolute bottom-0 p-4">
-        <LinkSignout isSidebarOpen={isSidebarOpen} />
-      </div> */}
     </aside>
   );
 };

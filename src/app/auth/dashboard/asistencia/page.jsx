@@ -144,7 +144,7 @@ const RegistrarAsistencia = () => {
             cedula: m.cedula_mie,
             nombre: m.nombre_mie,
             id_mie: m.id_mie,
-            fecha_nac: m.fechanacimiento_mie // Asume que el campo se llama 'fechanacimiento_mie' en el objeto devuelto.
+            fecha_nac: m.fechanacimiento_mie // Mapea la fecha de nacimiento del borrador para el cálculo de edad.
         })));
 
         Swal.fire({
@@ -196,45 +196,71 @@ const RegistrarAsistencia = () => {
     }
 
     // Extrae los datos del miembro seleccionado.
-    const {
-        id_mie: id,
-        nombre_mie: nombre,
-        cedula_mie: cedulaMiembro,
-        fecha_nac_mie: fechaNacimiento // Se extrae la fecha de nacimiento (asumido en la API de búsqueda).
-    } = selectedMiembro;
 
-    const codigo_eve = getValues("codigo_evento");
+const {
+  id_mie: id,
+  nombre_mie: nombre,
+  cedula_mie: cedulaMiembro,
+  // Se intenta extraer la fecha de nacimiento del miembro seleccionado.
+  // Si MemberSearch no la proporciona (o la proporciona como null/undefined), esta variable será undefined.
+  fecha_nac_mie: fechaNacimientoDesdeBusqueda
+} = selectedMiembro;
 
-    // 3. Validación de duplicados en la lista local.
-    const miembroExistenteEnBorrador = miembros.find((member) => member.id_mie === id);
-    if (miembroExistenteEnBorrador) {
-      Swal.fire({
-        title: "Error",
-        text: "Este miembro ya ha sido agregado a la lista actual de asistencia.",
-        icon: "error",
-        confirmButtonColor: "#d33",
-      });
-      return;
-    }
+const codigo_eve = getValues("codigo_evento");
 
-    // 4. Persistencia en el borrador de la base de datos.
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/asistencia/borrador`, {
-        codigo_eve,
-        id_mie: id,
-      });
+// 3. Validación de duplicados en la lista local.
+const miembroExistenteEnBorrador = miembros.find((member) => member.id_mie === id);
+if (miembroExistenteEnBorrador) {
+Swal.fire({
+  title: "Error",
+  text: "Este miembro ya ha sido agregado a la lista actual de asistencia.",
+  icon: "error",
+  confirmButtonColor: "#d33",
+});
+return;
+}
 
-      // 5. Actualización del estado local 'miembros' con la fecha de nacimiento.
-      setMiembros((prevMiembros) => [
-        ...prevMiembros,
-        {
-            cedula: cedulaMiembro,
-            nombre: nombre,
-            id_mie: id,
-            fecha_nac: fechaNacimiento // <-- Incluido en el estado para el resumen de edad
-        },
-      ]);
-    } catch (error) {
+// 4. Si la fecha de nacimiento no se obtuvo de la búsqueda inicial (MemberSearch),
+// se intenta obtenerla directamente de la base de datos para asegurar el cálculo de edad.
+let fechaNacimientoFinal = fechaNacimientoDesdeBusqueda;
+if (!fechaNacimientoFinal && id) { // Solo intenta buscar si no tenemos la fecha y tenemos un ID de miembro.
+try {
+  
+  // Este endpoint debería devolver la fecha de nacimiento con el mismo nombre de campo que el borrador.
+  const memberDetailsRes = await axios.get(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/miembro/${cedulaMiembro}`);
+  if (memberDetailsRes.data && memberDetailsRes.data.fechanacimiento_mie) {
+    fechaNacimientoFinal = memberDetailsRes.data.fechanacimiento_mie;
+  }
+} catch (detailError) {
+  console.error("Error al obtener detalles completos del miembro para la fecha de nacimiento:", detailError);
+  // Notifica al usuario si la fecha de nacimiento no pudo ser obtenida.
+  Swal.fire({
+    title: "Advertencia",
+    text: "No se pudo obtener la fecha de nacimiento completa del miembro. El resumen de edad podría ser inexacto.",
+    icon: "warning",
+    confirmButtonColor: "#f8bb86",
+  });
+}
+}
+
+// 4. Persistencia en el borrador de la base de datos.
+try {
+await axios.post(`${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/api/asistencia/borrador`, {
+  codigo_eve,
+  id_mie: id,
+});
+
+// 5. Actualización del estado local 'miembros' con la fecha de nacimiento obtenida.
+setMiembros((prevMiembros) => [
+  ...prevMiembros,
+  {
+      cedula: cedulaMiembro,
+      nombre: nombre,
+      id_mie: id,
+      fecha_nac: fechaNacimientoFinal // <-- Incluido en el estado para el resumen de edad
+  },
+]);
+} catch (error) {
       console.error("Error al agregar miembro al borrador:", error);
       Swal.fire("Error", "No se pudo agregar el miembro al borrador en la base de datos.", "error");
     }
