@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from "react";
-import { RiLockLine, RiUserLine, RiSparklingLine, RiEyeLine, RiEyeOffLine } from "react-icons/ri";
-import { FaSpinner } from "react-icons/fa";
+import { RiLockLine, RiUserLine, RiSparklingLine, RiEyeLine, RiEyeOffLine, RiSmartphoneLine } from "react-icons/ri";
+import { FaSpinner, FaAndroid, FaApple } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
@@ -167,7 +167,30 @@ const LoginCard = () => {
               </div>
             </form>
 
-            
+            {/* Seccion descarga app movil */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-4">
+                <RiSmartphoneLine className="h-5 w-5 text-purple-600" />
+                <p className="text-gray-600 text-sm font-medium">
+                  Descarga nuestra app móvil
+                </p>
+              </div>
+
+              <div>
+                {/* Google Play Badge */}
+                <a
+                  href="/descarga/android-app.apk"
+                  download
+                  className="flex items-center gap-4 px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-md shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-500/40"
+                >
+                  <FaAndroid className="h-8 w-8" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium opacity-80">DISPONIBLE EN</span>
+                    <span className="text-lg font-bold -mt-0.5">Google Play</span>
+                  </div>
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Lado Derecho: Imagen y Branding */}

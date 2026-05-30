@@ -24,12 +24,15 @@ export async function GET(req) {
     const query = `
       SELECT id_mie, cedula_mie, nombre_mie
       FROM tbmiembros
-      WHERE LOWER(cedula_mie) LIKE $1 OR LOWER(nombre_mie) LIKE $2
+      WHERE cedula_mie::TEXT LIKE $1 OR LOWER(nombre_mie) LIKE $2
       LIMIT 10
     `;
 
     
-    const result = await conn.query(query, [searchPattern, searchPattern]);
+    const result = await conn.query(query, [
+      searchPattern,
+      searchPattern.toLowerCase()
+    ]);
 
     console.log("Resultado de la consulta (API):", result);
     // ✅ En PostgreSQL + node-postgres, los resultados están en .rows

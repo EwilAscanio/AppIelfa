@@ -1,39 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📋 AppIelfa - Sistema de Gestión de Asistencia
 
-## Getting Started
+Sistema web para la gestión de asistencia de la **Iglesia IELFA**. Permite administrar miembros, familias, eventos y registrar la asistencia de manera eficiente, con generación de reportes en PDF.
 
-First, run the development server:
+## 🚀 Stack Tecnológico
+
+- **Framework:** Next.js 14.2.15 (App Router)
+- **Frontend:** React 18, Tailwind CSS 3
+- **Backend:** API Routes (Next.js Route Handlers)
+- **Base de datos:** PostgreSQL (Aiven Cloud)
+- **Autenticación:** NextAuth.js (Credentials Provider)
+- **Lenguaje:** JavaScript (JSX)
+
+## ✨ Funcionalidades
+
+- **Miembros:** CRUD completo con búsqueda, estadísticas por género/edad y cumpleaños
+- **Familias:** Gestión de núcleos familiares con jefe, miembros y parentescos
+- **Eventos:** CRUD con códigos únicos y estado activo/inactivo
+- **Asistencia:** Registro con soporte para borrador, detección de duplicados y modo reemplazo
+- **Reportes PDF:** Miembros, familias, eventos por fecha, asistencia por fecha/evento
+- **Dashboard:** Gráfico mensual de asistencia con Chart.js
+- **Usuarios:** Gestión de usuarios con roles (Admin/User)
+- **Autenticación:** Login seguro con contraseñas hasheadas (bcrypt)
+
+## 📦 Instalación
 
 ```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/appielfa.git
+cd appielfa
+
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+# Editar .env con tus credenciales de base de datos
+
+# Iniciar en desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🗄️ Base de Datos
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+El proyecto usa PostgreSQL. Las tablas principales son:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Tabla | Descripción |
+|---|---|
+| `tbmiembros` | Miembros de la iglesia |
+| `tbfamilias` | Familias |
+| `tbeventos` | Eventos |
+| `tbasistencia` | Registro de asistencia |
+| `tbasistencia_borrador` | Borradores de asistencia |
+| `tbusuarios` | Usuarios del sistema |
+| `tbroles` | Roles (Admin/User) |
+| `configuracion` | Contadores de la app |
 
-## Learn More
+## 📁 Estructura del Proyecto
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── api/               # API Routes
+│   ├── auth/dashboard/    # Páginas protegidas
+│   ├── login/             # Inicio de sesión
+│   └── registerusers/     # Registro de usuarios
+├── components/            # Componentes React
+│   └── reportes/          # Componentes de PDF
+└── libs/                  # Utilidades (conexión DB)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev      # Desarrollo
+npm run build    # Build producción
+npm run start    # Iniciar producción
+npm run lint     # Linter
+```
 
-## Deploy on Vercel
+## 🔐 Variables de Entorno
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+NEXTAUTH_SECRET=tu_secreto
+NEXTAUTH_URL=http://localhost:3000
+DB_HOST=tu_host
+DB_USER=tu_usuario
+DB_PASSWORD=tu_password
+DB_PORT=5432
+DB_NAME=tu_db
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 Licencia
 
-
-quiero que evalues mi codigo mi page.jsx que tengo abierto, el problema lo tengo solo en el resumen, el problema que estoy presentando es que cuando estoy cargando la asistencia y le doy al boton resumen de asistencia solo me esta mostrando solo el total de asistente, y me muestra todos sin fecha de nacimiento, luego si le doy actualizar la pagina alli si me coloca la cantidad de niño y de adultos.
+MIT
