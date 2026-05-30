@@ -179,7 +179,7 @@ const LoginCard = () => {
               <div>
                 {/* Google Play Badge */}
                 <a
-                  href="https://drive.google.com/uc?export=download&id=1I76ayJE9GbHSjLrKhLdyw5VE6qpsExFA"
+                  href="https://drive.google.com/uc?export=download&confirm=t&id=1I76ayJE9GbHSjLrKhLdyw5VE6qpsExFA"
                   download
                   className="flex items-center gap-4 px-5 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-md shadow-green-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-500/40"
                 >
